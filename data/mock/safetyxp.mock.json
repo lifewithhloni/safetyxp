@@ -1,0 +1,371 @@
+{
+  "companies": [
+    {
+      "id": "cmp_001",
+      "company_id": "cmp_001",
+      "name": "Northwind Safety",
+      "slug": "northwind-safety",
+      "industry": "Manufacturing",
+      "plan": "enterprise",
+      "status": "active",
+      "region": "US-East",
+      "timezone": "America/New_York",
+      "settings": {
+        "allow_ai_generation": true,
+        "require_manager_approval": true,
+        "enable_xp": true
+      },
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-07-01T00:00:00.000Z",
+      "created_by": null,
+      "updated_by": null
+    }
+  ],
+  "roles": [
+    {
+      "id": "role_001",
+      "company_id": "cmp_001",
+      "name": "super_admin",
+      "description": "Platform and tenant administrator",
+      "permissions": ["manage_company", "manage_users", "manage_policies", "manage_ai_content"],
+      "is_system": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "role_002",
+      "company_id": "cmp_001",
+      "name": "admin",
+      "description": "Operations administrator",
+      "permissions": ["manage_users", "manage_policies", "review_progress"],
+      "is_system": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "role_003",
+      "company_id": "cmp_001",
+      "name": "manager",
+      "description": "Department leader",
+      "permissions": ["approve_training", "review_team_progress"],
+      "is_system": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "role_004",
+      "company_id": "cmp_001",
+      "name": "employee",
+      "description": "Standard employee",
+      "permissions": ["complete_learning", "view_policies"],
+      "is_system": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "deleted_at": null
+    }
+  ],
+  "departments": [
+    {
+      "id": "dept_001",
+      "company_id": "cmp_001",
+      "name": "Operations",
+      "code": "OPS",
+      "parent_department_id": null,
+      "manager_id": null,
+      "headcount": 84,
+      "status": "active",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "created_by": null,
+      "updated_by": null,
+      "deleted_at": null
+    },
+    {
+      "id": "dept_002",
+      "company_id": "cmp_001",
+      "name": "Maintenance",
+      "code": "MNT",
+      "parent_department_id": "dept_001",
+      "manager_id": null,
+      "headcount": 41,
+      "status": "active",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "created_by": null,
+      "updated_by": null,
+      "deleted_at": null
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_001",
+      "company_id": "cmp_001",
+      "email": "maya.chen@northwind-safety.com",
+      "full_name": "Maya Chen",
+      "avatar_url": null,
+      "role_id": "role_002",
+      "department_id": "dept_001",
+      "manager_id": null,
+      "status": "active",
+      "locale": "en-US",
+      "last_seen_at": "2024-07-02T09:15:00.000Z",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-07-02T09:15:00.000Z",
+      "created_by": null,
+      "updated_by": null,
+      "deleted_at": null
+    },
+    {
+      "id": "usr_002",
+      "company_id": "cmp_001",
+      "email": "luis.perez@northwind-safety.com",
+      "full_name": "Luis Perez",
+      "avatar_url": null,
+      "role_id": "role_004",
+      "department_id": "dept_002",
+      "manager_id": "usr_001",
+      "status": "active",
+      "locale": "en-US",
+      "last_seen_at": "2024-07-02T08:00:00.000Z",
+      "created_at": "2024-01-02T00:00:00.000Z",
+      "updated_at": "2024-07-02T08:00:00.000Z",
+      "created_by": null,
+      "updated_by": null,
+      "deleted_at": null
+    }
+  ],
+  "policies": [
+    {
+      "id": "pol_001",
+      "company_id": "cmp_001",
+      "title": "Lockout Tagout Procedure",
+      "version": "v1.4",
+      "summary": "Controls the safe shutdown and isolation of equipment before maintenance.",
+      "body": "Follow the documented isolation steps before interacting with equipment.",
+      "category": "safety",
+      "status": "published",
+      "effective_date": "2024-01-01T00:00:00.000Z",
+      "expiry_date": null,
+      "owner_user_id": "usr_001",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-06-20T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "learningModules": [
+    {
+      "id": "mod_001",
+      "company_id": "cmp_001",
+      "title": "Hazard Recognition Essentials",
+      "slug": "hazard-recognition-essentials",
+      "description": "Build the skills to identify and report hazards before they become incidents.",
+      "category": "safety",
+      "difficulty": "beginner",
+      "estimated_minutes": 18,
+      "thumbnail_url": null,
+      "policy_id": "pol_001",
+      "prerequisite_module_id": null,
+      "is_published": true,
+      "created_at": "2024-02-01T00:00:00.000Z",
+      "updated_at": "2024-02-01T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "quiz_001",
+      "company_id": "cmp_001",
+      "module_id": "mod_001",
+      "title": "Hazard Recognition Quiz",
+      "type": "assessment",
+      "passing_score": 80,
+      "time_limit_minutes": 10,
+      "is_active": true,
+      "created_at": "2024-02-02T00:00:00.000Z",
+      "updated_at": "2024-02-02T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "questions": [
+    {
+      "id": "qst_001",
+      "company_id": "cmp_001",
+      "quiz_id": "quiz_001",
+      "prompt": "Which action should be taken first when you find an exposed wire?",
+      "question_type": "single_choice",
+      "options": [
+        {
+          "id": "opt_001",
+          "label": "Report it immediately and isolate the area",
+          "feedback": "Correct. The hazard should be controlled right away.",
+          "is_correct": true
+        },
+        {
+          "id": "opt_002",
+          "label": "Continue working and mention it later",
+          "feedback": "Incorrect. The hazard must be escalated immediately.",
+          "is_correct": false
+        }
+      ],
+      "correct_option_ids": ["opt_001"],
+      "explanation": "Immediate hazard control prevents injury.",
+      "difficulty": "easy",
+      "created_at": "2024-02-02T00:00:00.000Z",
+      "updated_at": "2024-02-02T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "scenarioChallenges": [
+    {
+      "id": "scn_001",
+      "company_id": "cmp_001",
+      "title": "Blocked Emergency Exit",
+      "description": "A pallet has been left across an emergency exit during a shift change.",
+      "module_id": "mod_001",
+      "policy_id": "pol_001",
+      "scenario_type": "incident",
+      "difficulty": "medium",
+      "prompt": "What is the best next step?",
+      "expected_outcome": "The hazard is reported and cleared before operations continue.",
+      "points": 120,
+      "created_at": "2024-02-03T00:00:00.000Z",
+      "updated_at": "2024-02-03T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "certificates": [
+    {
+      "id": "crt_001",
+      "company_id": "cmp_001",
+      "user_id": "usr_002",
+      "module_id": "mod_001",
+      "quiz_id": "quiz_001",
+      "title": "Hazard Recognition Certificate",
+      "status": "issued",
+      "issued_at": "2024-02-10T00:00:00.000Z",
+      "expires_at": "2026-02-10T00:00:00.000Z",
+      "credential_id": "cred_001",
+      "score": 92,
+      "created_at": "2024-02-10T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "progress": [
+    {
+      "id": "prg_001",
+      "company_id": "cmp_001",
+      "user_id": "usr_002",
+      "module_id": "mod_001",
+      "quiz_id": "quiz_001",
+      "status": "completed",
+      "completion_percentage": 100,
+      "score": 92,
+      "started_at": "2024-02-05T00:00:00.000Z",
+      "completed_at": "2024-02-10T00:00:00.000Z",
+      "last_activity_at": "2024-02-10T00:00:00.000Z",
+      "xp_earned": 320,
+      "created_at": "2024-02-05T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z",
+      "deleted_at": null
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ach_001",
+      "company_id": "cmp_001",
+      "user_id": "usr_002",
+      "title": "First Certificate Earned",
+      "category": "learning",
+      "description": "Completed the first required learning module.",
+      "icon_url": null,
+      "earned_at": "2024-02-10T00:00:00.000Z",
+      "xp_value": 150,
+      "badge_code": "first-certificate",
+      "created_at": "2024-02-10T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ],
+  "xpEvents": [
+    {
+      "id": "xp_001",
+      "company_id": "cmp_001",
+      "user_id": "usr_002",
+      "source": "quiz",
+      "amount": 320,
+      "reason": "Completed Hazard Recognition Quiz",
+      "related_entity_type": "quiz",
+      "related_entity_id": "quiz_001",
+      "created_at": "2024-02-10T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "not_001",
+      "company_id": "cmp_001",
+      "user_id": "usr_002",
+      "type": "certificate_ready",
+      "title": "Certificate ready",
+      "body": "Your certificate for Hazard Recognition is available.",
+      "is_read": false,
+      "action_url": "/certificates",
+      "created_at": "2024-02-10T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "aud_001",
+      "company_id": "cmp_001",
+      "actor_user_id": "usr_001",
+      "actor_role": "admin",
+      "entity_type": "certificate",
+      "entity_id": "crt_001",
+      "action": "insert",
+      "metadata": {
+        "source": "manual_review"
+      },
+      "ip_address": "203.0.113.10",
+      "created_at": "2024-02-10T00:00:00.000Z",
+      "updated_at": "2024-02-10T00:00:00.000Z"
+    }
+  ],
+  "aiGeneratedContent": [
+    {
+      "id": "aic_001",
+      "company_id": "cmp_001",
+      "created_by_user_id": "usr_001",
+      "entity_type": "module",
+      "entity_id": "mod_001",
+      "prompt": "Create a short learning module for hazard recognition.",
+      "output": "Generated learning summary and quiz prompts for hazard recognition training.",
+      "model_name": "gpt-4.1",
+      "status": "approved",
+      "confidence_score": 0.92,
+      "created_at": "2024-02-01T00:00:00.000Z",
+      "updated_at": "2024-02-01T00:00:00.000Z",
+      "created_by": "usr_001",
+      "updated_by": "usr_001",
+      "deleted_at": null
+    }
+  ]
+}
