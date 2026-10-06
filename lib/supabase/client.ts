@@ -7,16 +7,7 @@ const safeKey =
   "placeholder-publishable-key";
 
 export function createClient() {
-  return createBrowserClient(safeUrl, safeKey, {
-    cookies: {
-      getAll() {
-        return [];
-      },
-      setAll() {
-        return;
-      },
-    },
-  });
+  return createBrowserClient(safeUrl, safeKey);
 }
 
 export const supabaseBrowser = createClient();

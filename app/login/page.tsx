@@ -5,6 +5,48 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { ShieldCheck } from "lucide-react";
 
+type LoginResult = {
+  data: { user: unknown | null };
+  error: unknown | null;
+};
+
+export function getLoginRedirect(searchParams: Pick<URLSearchParams, "get">) {
+  return searchParams.get("redirect") || "/today";
+}
+
+export async function submitLogin({
+  signIn,
+  redirectTo,
+  router,
+  setError,
+  setIsLoading,
+}: {
+  signIn: () => Promise<LoginResult>;
+  redirectTo: string;
+  router: { push: (path: string) => void; refresh: () => void };
+  setError: (error: string | null) => void;
+  setIsLoading: (isLoading: boolean) => void;
+}) {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    const { data, error: signInError } = await signIn();
+
+    if (signInError || !data.user) {
+      setError("Your email or password is incorrect. Please try again.");
+      return;
+    }
+
+    router.push(redirectTo);
+    router.refresh();
+  } catch {
+    setError("Unable to sign in right now. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,21 +58,15 @@ function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    const redirectTo = getLoginRedirect(searchParams);
 
-    const { data, error: signInError } = await supabaseBrowser.auth.signInWithPassword({ email, password });
-
-    if (signInError || !data.user) {
-      setError("Your email or password is incorrect. Please try again.");
-      setIsLoading(false);
-      return;
-    }
-
-    const redirectTo = searchParams.get("redirect") || "/today";
-    router.push(redirectTo);
-    router.refresh();
-    setIsLoading(false);
+    await submitLogin({
+      signIn: () => supabaseBrowser.auth.signInWithPassword({ email, password }),
+      redirectTo,
+      router,
+      setError,
+      setIsLoading,
+    });
   }
 
   return (
