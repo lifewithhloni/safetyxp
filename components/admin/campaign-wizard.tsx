@@ -77,7 +77,7 @@ export function CampaignWizard() {
                 {draft.selectedMethod === "csv" ? <CSVUploader onFileSelect={handleCsvSelected} /> : null}
               </AssignmentMethodCard>
             </div>
-            {draft.selectedMethod === "csv" ? <CSVPreviewTable employees={draft.importedEmployees as any} /> : null}
+            {draft.selectedMethod === "csv" ? <CSVPreviewTable employees={draft.importedEmployees as CsvEmployeeRow[]} /> : null}
             <div className="flex justify-end">
               <button type="button" onClick={goNext} className="rounded-full bg-[#0b3d91] px-5 py-3 text-sm font-semibold text-white">Continue</button>
             </div>

@@ -1,10 +1,8 @@
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { queueNotificationEvent } from "@/services/notifications/notification-queue.service";
 import type { Notification, NotificationProviderResponse, NotificationEvent } from "@/types/notifications";
 import { getNotificationTemplate } from "@/services/notifications/notification-template.service";
 import { getNotificationPreferences } from "@/services/notifications/notification-preferences.service";
-import { MockNotificationProvider } from "@/services/notifications/mock-notification-provider";
-
-const provider = new MockNotificationProvider();
-const notificationStore: Notification[] = [];
 
 function generateId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
@@ -39,44 +37,65 @@ function buildNotification(event: NotificationEvent, channel: NotificationProvid
   };
 }
 
-export function getNotificationsForUser(userId: string) {
-  return notificationStore.filter((notification) => notification.userId === userId);
+export async function getNotificationsForUser(userId: string) {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("notifications")
+    .select("id, company_id, user_id, type, title, message, priority, channel, status, read_at, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((item) => ({
+    id: item.id,
+    companyId: item.company_id,
+    userId: item.user_id,
+    eventId: item.id,
+    eventType: item.type as NotificationEvent["eventType"],
+    title: item.title,
+    body: item.message,
+    channel: item.channel as NotificationProviderResponse["channel"],
+    status: item.status.toUpperCase() as Notification["status"],
+    priority: item.priority.toUpperCase() as Notification["priority"],
+    isRead: Boolean(item.read_at),
+    createdAt: item.created_at,
+    updatedAt: item.created_at,
+  }));
 }
 
-export function getUnreadNotifications(userId: string) {
-  return notificationStore.filter((notification) => notification.userId === userId && !notification.isRead);
+export async function getUnreadNotifications(userId: string) {
+  const notifications = await getNotificationsForUser(userId);
+  return notifications.filter((notification) => !notification.isRead);
 }
 
-export function markNotificationAsRead(notificationId: string) {
-  const notification = notificationStore.find((item) => item.id === notificationId);
-  if (!notification) {
-    return null;
-  }
-  notification.isRead = true;
-  notification.status = "READ";
-  notification.updatedAt = new Date().toISOString();
-  return notification;
+export async function markNotificationAsRead(notificationId: string) {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("notifications")
+    .update({ status: "read", read_at: new Date().toISOString() })
+    .eq("id", notificationId)
+    .select("id")
+    .maybeSingle();
+
+  return data;
 }
 
-export function markAllNotificationsAsRead(userId: string) {
-  const notifications = notificationStore.filter((item) => item.userId === userId && !item.isRead);
-  notifications.forEach((notification) => {
-    notification.isRead = true;
-    notification.status = "READ";
-    notification.updatedAt = new Date().toISOString();
-  });
-  return notifications;
+export async function markAllNotificationsAsRead(userId: string) {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("notifications")
+    .update({ status: "read", read_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .is("read_at", null)
+    .select("id");
+
+  return data ?? [];
 }
 
 export async function sendNotification(event: NotificationEvent, channel: NotificationProviderResponse["channel"] = "IN_APP") {
   const notification = buildNotification(event, channel);
-  const response = await provider.send(notification);
-
-  notification.status = response.success ? "SENT" : "FAILED";
-  notification.updatedAt = new Date().toISOString();
-  notificationStore.push(notification);
-
-  return { notification, response };
+  const recipientEmail = typeof event.payload.email === "string" ? event.payload.email : undefined;
+  const queued = await queueNotificationEvent(event, channel as "IN_APP" | "EMAIL", recipientEmail);
+  return { notification: { ...notification, id: queued.id }, response: { success: true, provider: channel === "EMAIL" ? "queue" : "in-app", channel, timestamp: new Date().toISOString() } };
 }
 
 export function createNotificationsForEvent(event: NotificationEvent) {

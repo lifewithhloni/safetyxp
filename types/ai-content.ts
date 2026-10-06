@@ -1,4 +1,4 @@
-export type ContentStatus = "DRAFT" | "AI_GENERATED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "PUBLISHED";
+export type ContentStatus = "DRAFT" | "QUEUED" | "ANALYZING" | "GENERATING" | "VALIDATING" | "AI_GENERATED" | "NEEDS_REVIEW" | "UNDER_REVIEW" | "READY_FOR_REVIEW" | "APPROVED" | "REJECTED" | "FAILED" | "PUBLISHED";
 
 export interface PolicyDocumentMetadata {
   id: string;
@@ -52,6 +52,7 @@ export interface LearningModule {
   status: ContentStatus;
   sourceDocumentId: string;
   sourceSection?: string;
+  sourceExcerpt?: string;
 }
 
 export interface QuizQuestion {
@@ -65,6 +66,7 @@ export interface QuizQuestion {
   status: ContentStatus;
   sourceDocumentId: string;
   sourceSection?: string;
+  sourceExcerpt?: string;
 }
 
 export interface ScenarioChallenge {
@@ -79,6 +81,7 @@ export interface ScenarioChallenge {
   status: ContentStatus;
   sourceDocumentId: string;
   sourceSection?: string;
+  sourceExcerpt?: string;
 }
 
 export interface FlashcardItem {
@@ -90,6 +93,7 @@ export interface FlashcardItem {
   status: ContentStatus;
   sourceDocumentId: string;
   sourceSection?: string;
+  sourceExcerpt?: string;
 }
 
 export interface KeyRule {
@@ -99,6 +103,7 @@ export interface KeyRule {
   status: ContentStatus;
   sourceDocumentId: string;
   sourceSection?: string;
+  sourceExcerpt?: string;
 }
 
 export interface GeneratedContentPackage {

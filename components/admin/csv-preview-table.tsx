@@ -7,7 +7,6 @@ type CSVPreviewTableProps = {
     email: string;
     employeeNumber: string;
     department: string;
-    jobTitle: string;
     manager: string;
     location: string;
   }>;

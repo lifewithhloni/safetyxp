@@ -22,7 +22,7 @@ const automationRules: AutomationRule[] = [
     channels: ["IN_APP", "EMAIL"],
     frequency: "once",
     enabled: true,
-    mandatory: false,
+    mandatory: true,
     priority: "HIGH",
   },
   {
@@ -50,6 +50,18 @@ const automationRules: AutomationRule[] = [
     priority: "NORMAL",
   },
   {
+    id: "rule_manager_compliance_alert",
+    name: "Manager compliance alert",
+    eventType: "ManagerComplianceAlert",
+    description: "Send aggregated risk alerts to company leaders.",
+    audience: ["ADMIN", "HR"],
+    channels: ["EMAIL"],
+    frequency: "once_per_risk_event",
+    enabled: true,
+    mandatory: true,
+    priority: "CRITICAL",
+  },
+  {
     id: "rule_campaign_deadline_approaching",
     name: "Campaign deadline approaching",
     eventType: "CampaignDeadlineApproaching",
@@ -58,7 +70,7 @@ const automationRules: AutomationRule[] = [
     channels: ["EMAIL"],
     frequency: "once",
     enabled: true,
-    mandatory: false,
+    mandatory: true,
     priority: "HIGH",
   },
   {
@@ -82,7 +94,7 @@ const automationRules: AutomationRule[] = [
     channels: ["IN_APP", "EMAIL"],
     frequency: "once",
     enabled: true,
-    mandatory: false,
+    mandatory: true,
     priority: "NORMAL",
   },
   {
@@ -94,7 +106,7 @@ const automationRules: AutomationRule[] = [
     channels: ["IN_APP", "EMAIL"],
     frequency: "once",
     enabled: true,
-    mandatory: false,
+    mandatory: true,
     priority: "HIGH",
   },
   {

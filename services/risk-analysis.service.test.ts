@@ -1,8 +1,8 @@
-import { calculateRiskScore, predictCompletion, getAtRiskEmployees, getCampaignRisk } from "@/services/risk-analysis.service";
+import { calculateRiskScore, predictCompletion, getAtRiskEmployees, getCampaignRisk, type EmployeeRiskInput } from "@/services/risk-analysis.service";
 
 describe("risk-analysis.service", () => {
   it("calculates a reasonable risk score for a low-progress employee", () => {
-    const score = calculateRiskScore({
+    const input: EmployeeRiskInput = {
       employeeId: "emp-100",
       employeeName: "Test User",
       campaignName: "Fire Safety",
@@ -16,14 +16,16 @@ describe("risk-analysis.service", () => {
       missedMissions: 1,
       completionVelocity: 5,
       requiredDailyLearning: 18,
-    } as any);
+    };
+
+    const score = calculateRiskScore(input);
 
     expect(score).toBeGreaterThanOrEqual(55);
     expect(score).toBeLessThanOrEqual(100);
   });
 
   it("predicts completion dates near or after the deadline for slow progress", () => {
-    const result = predictCompletion({
+    const input: EmployeeRiskInput = {
       employeeId: "emp-100",
       employeeName: "Test User",
       campaignName: "Fire Safety",
@@ -37,7 +39,9 @@ describe("risk-analysis.service", () => {
       missedMissions: 1,
       completionVelocity: 5,
       requiredDailyLearning: 10,
-    } as any, new Date("2026-08-20"));
+    };
+
+    const result = predictCompletion(input, new Date("2026-08-20"));
 
     expect(new Date(result.predictedCompletionDate).getTime()).toBeGreaterThanOrEqual(new Date("2026-08-30").getTime());
   });

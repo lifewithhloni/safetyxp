@@ -15,11 +15,15 @@ export type NotificationEventType =
   | "EmployeeBackOnTrack"
   | "CampaignDeadlineApproaching"
   | "CampaignCompleted"
+  | "CertificateEligible"
   | "CertificateIssued"
   | "CertificateExpiring"
   | "CertificateExpired"
   | "EmployeeInvited"
+  | "ManagerComplianceAlert"
   | "WeeklyComplianceSummary";
+
+export type NotificationDeliveryStatus = "QUEUED" | "SENDING" | "SENT" | "DELIVERED" | "FAILED" | "CANCELLED";
 
 export interface NotificationPayload {
   companyId: DatabaseId;
@@ -121,4 +125,21 @@ export interface NotificationAuditRecord {
   status: NotificationStatus;
   reason?: string;
   metadata?: Record<string, unknown>;
+}
+
+export interface NotificationDeliveryRecord {
+  id: string;
+  notificationId: string;
+  companyId: DatabaseId;
+  recipient: string;
+  channel: NotificationChannel;
+  provider: string;
+  status: NotificationDeliveryStatus;
+  attempts: number;
+  sentAt?: string | null;
+  deliveredAt?: string | null;
+  failedAt?: string | null;
+  errorCode?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

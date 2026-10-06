@@ -223,19 +223,19 @@ export interface ReadOnlyRepository<T, TFilters = Record<string, unknown>> {
   getByCompany(companyId: DatabaseId): Promise<T[]>;
 }
 
-export interface CompanyRepository extends ReadOnlyRepository<CompanyRecord> {}
-export interface UserRepository extends ReadOnlyRepository<UserRecord> {}
-export interface RoleRepository extends ReadOnlyRepository<RoleRecord> {}
-export interface DepartmentRepository extends ReadOnlyRepository<DepartmentRecord> {}
-export interface PolicyRepository extends ReadOnlyRepository<PolicyRecord> {}
-export interface LearningModuleRepository extends ReadOnlyRepository<LearningModuleRecord> {}
-export interface QuizRepository extends ReadOnlyRepository<QuizRecord> {}
-export interface QuestionRepository extends ReadOnlyRepository<QuestionRecord> {}
-export interface ScenarioChallengeRepository extends ReadOnlyRepository<ScenarioChallengeRecord> {}
-export interface CertificateRepository extends ReadOnlyRepository<CertificateRecord> {}
-export interface ProgressRepository extends ReadOnlyRepository<ProgressRecord> {}
-export interface AchievementRepository extends ReadOnlyRepository<AchievementRecord> {}
-export interface XpEventRepository extends ReadOnlyRepository<XpEventRecord> {}
-export interface NotificationRepository extends ReadOnlyRepository<NotificationRecord> {}
-export interface AuditLogRepository extends ReadOnlyRepository<AuditLogRecord> {}
-export interface AiGeneratedContentRepository extends ReadOnlyRepository<AiGeneratedContentRecord> {}
+export type CompanyRepository = ReadOnlyRepository<CompanyRecord>;
+export type UserRepository = ReadOnlyRepository<UserRecord>;
+export type RoleRepository = ReadOnlyRepository<RoleRecord>;
+export type DepartmentRepository = ReadOnlyRepository<DepartmentRecord>;
+export type PolicyRepository = ReadOnlyRepository<PolicyRecord>;
+export type LearningModuleRepository = ReadOnlyRepository<LearningModuleRecord>;
+export type QuizRepository = ReadOnlyRepository<QuizRecord>;
+export type QuestionRepository = ReadOnlyRepository<QuestionRecord>;
+export type ScenarioChallengeRepository = ReadOnlyRepository<ScenarioChallengeRecord>;
+export type CertificateRepository = ReadOnlyRepository<CertificateRecord>;
+export type ProgressRepository = ReadOnlyRepository<ProgressRecord>;
+export type AchievementRepository = ReadOnlyRepository<AchievementRecord>;
+export type XpEventRepository = ReadOnlyRepository<XpEventRecord>;
+export type NotificationRepository = ReadOnlyRepository<NotificationRecord>;
+export type AuditLogRepository = ReadOnlyRepository<AuditLogRecord>;
+export type AiGeneratedContentRepository = ReadOnlyRepository<AiGeneratedContentRecord>;

@@ -105,33 +105,36 @@ export const auditMetrics: AuditMetric[] = [
   { id: "audit-4", label: "Audit Score", value: "96%", description: "Current audit readiness" },
 ];
 
-export function filterReportItems<T extends { id: string }>(items: T[], filters: ReportFilters, key: keyof T | null = null) {
+type ReportFilterableKeys = "department" | "campaign" | "location" | "manager" | "employee" | "status";
+type FilterableReportItem = { id: string } & Partial<Record<ReportFilterableKeys, string>>;
+
+export function filterReportItems<T extends FilterableReportItem>(items: T[], filters: ReportFilters, key: ReportFilterableKeys | null = null) {
   if (filters.status === "All" && filters.department === "All departments" && filters.campaign === "All campaigns" && filters.location === "All locations" && filters.manager === "All managers" && filters.employee === "All employees") {
     return items;
   }
 
   return items.filter((item) => {
-    if (filters.department !== "All departments" && key === "department" && (item as any)["department"] !== filters.department) {
+    if (filters.department !== "All departments" && key === "department" && item.department !== filters.department) {
       return false;
     }
 
-    if (filters.campaign !== "All campaigns" && key === "campaign" && (item as any)["campaign"] !== filters.campaign) {
+    if (filters.campaign !== "All campaigns" && key === "campaign" && item.campaign !== filters.campaign) {
       return false;
     }
 
-    if (filters.location !== "All locations" && key === "location" && (item as any)["location"] !== filters.location) {
+    if (filters.location !== "All locations" && key === "location" && item.location !== filters.location) {
       return false;
     }
 
-    if (filters.manager !== "All managers" && key === "manager" && (item as any)["manager"] !== filters.manager) {
+    if (filters.manager !== "All managers" && key === "manager" && item.manager !== filters.manager) {
       return false;
     }
 
-    if (filters.employee !== "All employees" && key === "employee" && (item as any)["employee"] !== filters.employee) {
+    if (filters.employee !== "All employees" && key === "employee" && item.employee !== filters.employee) {
       return false;
     }
 
-    if (filters.status !== "All" && key === "status" && (item as any)["status"] !== filters.status) {
+    if (filters.status !== "All" && key === "status" && item.status !== filters.status) {
       return false;
     }
 

@@ -1,4 +1,6 @@
-import { Bell, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { AvatarMenu } from "@/components/navigation/avatar-menu";
+import { NotificationBell } from "@/components/navigation/notification-bell";
 
 export function Header({ title, description }: { title: string; description: string }) {
   return (
@@ -14,15 +16,8 @@ export function Header({ title, description }: { title: string; description: str
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-50">
-            <Bell size={17} />
-          </button>
-          <div className="hidden rounded-full border border-slate-200 px-3 py-2 sm:flex sm:items-center sm:gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0b3d91] text-xs font-semibold text-white">
-              MC
-            </div>
-            <span className="text-sm font-medium text-slate-700">Maya Chen</span>
-          </div>
+          <NotificationBell />
+          <AvatarMenu />
         </div>
       </div>
       <div className="mt-4">

@@ -4,5 +4,6 @@ module.exports = {
   testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^server-only$': '<rootDir>/test/mocks/server-only.ts',
   },
 };

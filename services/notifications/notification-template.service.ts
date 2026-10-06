@@ -51,6 +51,13 @@ const templates: NotificationTemplate[] = [
     priority: "NORMAL",
   },
   {
+    key: "ManagerComplianceAlert",
+    title: "Employees at risk",
+    body: "Multiple employees are at risk of missing a training deadline. Review the impacted team and intervene early.",
+    defaultChannels: ["EMAIL"],
+    priority: "CRITICAL",
+  },
+  {
     key: "CampaignDeadlineApproaching",
     title: "Campaign deadline approaching",
     body: "The campaign deadline is approaching. Help your team finish the necessary missions.",

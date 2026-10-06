@@ -169,7 +169,7 @@ export function getRecommendedActions(riskLevel: RiskLevel): string {
   }
 }
 
-function determineRiskLevel(score: number): RiskLevel {
+export function determineRiskLevel(score: number): RiskLevel {
   if (score >= 80) return "CRITICAL";
   if (score >= 55) return "HIGH";
   if (score >= 30) return "MEDIUM";

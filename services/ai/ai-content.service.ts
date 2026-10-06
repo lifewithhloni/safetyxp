@@ -2,7 +2,6 @@ import type {
   PolicyDocumentMetadata,
   PolicyAnalysis,
   PolicySummary,
-  LearningObjective,
   LearningModule,
   QuizQuestion,
   ScenarioChallenge,
@@ -14,7 +13,9 @@ import { getAIProvider } from "@/services/ai/ai-provider-factory";
 import { validateGeneratedContent } from "@/services/ai/content-validation.service";
 import { extractTextFromDocument, analyzeDocumentStructure, validateDocumentExtraction } from "@/services/ai/document-analysis.service";
 
-const aiProvider = getAIProvider();
+function getProvider() {
+  return getAIProvider();
+}
 
 export async function analyzePolicy(document: PolicyDocumentMetadata, file: File | { name: string; type: string; content: string }): Promise<{ analysis: PolicyAnalysis; text: string }> {
   const text = await extractTextFromDocument(file);
@@ -22,12 +23,13 @@ export async function analyzePolicy(document: PolicyDocumentMetadata, file: File
     throw new Error("Unable to extract policy content from the uploaded document.");
   }
 
-  const analysis = analyzeDocumentStructure(document, text);
+  const aiResponse = await getProvider().analyzePolicy(document, text);
+  const analysis = aiResponse.success ? aiResponse.data : analyzeDocumentStructure(document, text);
   return { analysis, text };
 }
 
 export async function generateSummary(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<PolicySummary> {
-  const response = await aiProvider.generateSummary(document, analysis, text);
+  const response = await getProvider().generateSummary(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Summary generation failed.");
   }
@@ -35,7 +37,7 @@ export async function generateSummary(document: PolicyDocumentMetadata, analysis
 }
 
 export async function generateLearningObjectives(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<string[]> {
-  const response = await aiProvider.generateLearningObjectives(document, analysis, text);
+  const response = await getProvider().generateLearningObjectives(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Learning objective generation failed.");
   }
@@ -43,7 +45,7 @@ export async function generateLearningObjectives(document: PolicyDocumentMetadat
 }
 
 export async function generateLessons(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<LearningModule[]> {
-  const response = await aiProvider.generateLessons(document, analysis, text);
+  const response = await getProvider().generateLessons(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Lesson generation failed.");
   }
@@ -51,7 +53,7 @@ export async function generateLessons(document: PolicyDocumentMetadata, analysis
 }
 
 export async function generateQuizQuestions(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<QuizQuestion[]> {
-  const response = await aiProvider.generateQuiz(document, analysis, text);
+  const response = await getProvider().generateQuiz(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Quiz generation failed.");
   }
@@ -59,7 +61,7 @@ export async function generateQuizQuestions(document: PolicyDocumentMetadata, an
 }
 
 export async function generateScenarios(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<ScenarioChallenge[]> {
-  const response = await aiProvider.generateScenarios(document, analysis, text);
+  const response = await getProvider().generateScenarios(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Scenario generation failed.");
   }
@@ -67,7 +69,7 @@ export async function generateScenarios(document: PolicyDocumentMetadata, analys
 }
 
 export async function generateFlashcards(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<FlashcardItem[]> {
-  const response = await aiProvider.generateFlashcards(document, analysis, text);
+  const response = await getProvider().generateFlashcards(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Flashcard generation failed.");
   }
@@ -75,7 +77,7 @@ export async function generateFlashcards(document: PolicyDocumentMetadata, analy
 }
 
 export async function generateKeyRules(document: PolicyDocumentMetadata, analysis: PolicyAnalysis, text: string): Promise<KeyRule[]> {
-  const response = await aiProvider.generateKeyRules(document, analysis, text);
+  const response = await getProvider().generateKeyRules(document, analysis, text);
   if (!response.success) {
     throw new Error(response.errors?.join(", ") ?? "Key rule generation failed.");
   }
@@ -84,6 +86,7 @@ export async function generateKeyRules(document: PolicyDocumentMetadata, analysi
 
 export async function generateContentPackage(document: PolicyDocumentMetadata, file: File | { name: string; type: string; content: string }): Promise<GeneratedContentPackage> {
   const { analysis, text } = await analyzePolicy(document, file);
+  const provider = getProvider();
   const summary = await generateSummary(document, analysis, text);
   const objectivesText = await generateLearningObjectives(document, analysis, text);
   const lessons = await generateLessons(document, analysis, text);
@@ -91,6 +94,21 @@ export async function generateContentPackage(document: PolicyDocumentMetadata, f
   const scenarios = await generateScenarios(document, analysis, text);
   const flashcards = await generateFlashcards(document, analysis, text);
   const keyRules = await generateKeyRules(document, analysis, text);
+
+  const grounding = await provider.validateContentGrounding(document, text, {
+    analysis,
+    summary,
+    objectivesText,
+    lessons,
+    quizQuestions,
+    scenarios,
+    flashcards,
+    keyRules,
+  });
+
+  const packageStatus = grounding.success && grounding.data.grounded && grounding.data.confidence >= 0.7
+    ? "UNDER_REVIEW"
+    : "NEEDS_REVIEW";
 
   const contentPackage: GeneratedContentPackage = {
     policyDocumentId: document.id,
@@ -106,8 +124,10 @@ export async function generateContentPackage(document: PolicyDocumentMetadata, f
     scenarios,
     flashcards,
     keyRules,
-    warnings: analysis.potentialAmbiguities,
-    status: "AI_GENERATED",
+    warnings: grounding.success
+      ? [...analysis.potentialAmbiguities, ...grounding.data.issues.map((issue) => issue.message)]
+      : analysis.potentialAmbiguities,
+    status: packageStatus,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

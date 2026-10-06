@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/cron/daily-missions", "schedule": "0 5 * * *" },
+    { "path": "/api/cron/risk-analysis", "schedule": "15 5 * * *" },
+    { "path": "/api/cron/deadline-reminders", "schedule": "30 5 * * *" },
+    { "path": "/api/cron/certificate-expiry", "schedule": "45 5 * * *" },
+    { "path": "/api/cron/weekly-summary", "schedule": "0 6 * * 1" },
+    { "path": "/api/cron/process-notifications", "schedule": "*/15 * * * *" }
+  ]
+}

@@ -1,4 +1,5 @@
 import type { NotificationEvent } from "@/types/notifications";
+import { reportServerError } from "@/lib/security/sentry-server";
 
 const listeners: Array<(event: NotificationEvent) => void> = [];
 
@@ -17,7 +18,11 @@ export function dispatchNotificationEvent(event: NotificationEvent) {
     try {
       listener(event);
     } catch (error) {
-      console.error("Notification event listener failed:", error);
+      reportServerError(error, {
+        component: "notification_events",
+        operation: "dispatch_listener",
+        failure_scope: "listener",
+      });
     }
   });
 }

@@ -29,9 +29,9 @@ describe("AI content generation pipeline", () => {
   it("generates a valid content package", async () => {
     const packageResult = await generateContentPackage(mockDocument, mockFile);
     expect(packageResult.policyDocumentId).toBe(mockDocument.id);
-    expect(packageResult.summary.status).toBe("AI_GENERATED");
+    expect(["AI_GENERATED", "UNDER_REVIEW", "NEEDS_REVIEW"]).toContain(packageResult.summary.status);
     expect(packageResult.lessons.length).toBeGreaterThan(0);
     expect(packageResult.quizQuestions.every((question) => question.options.includes(question.correctAnswer))).toBe(true);
-    expect(packageResult.status).toBe("AI_GENERATED");
+    expect(["UNDER_REVIEW", "NEEDS_REVIEW"]).toContain(packageResult.status);
   });
 });
