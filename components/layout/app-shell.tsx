@@ -25,7 +25,7 @@ export function AppShell({
           <Sidebar />
         </div>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           <motion.main
             key={pathname}
             initial={{ opacity: 0, y: 8 }}

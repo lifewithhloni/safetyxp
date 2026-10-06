@@ -295,16 +295,19 @@ export async function issueCertificate(campaignId: string, employeeId: string) {
 
 export async function getEmployeeCertificates() {
   const supabase = await createServerSupabaseClient();
-  const profile = await getCurrentProfile();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
-  if (!profile) {
+  if (authError || !user) {
     return [] as CertificateRecord[];
   }
 
   const { data } = await supabase
     .from("certificates")
     .select("id, company_id, employee_id, campaign_id, certificate_number, issued_at, expires_at, status, verification_code, storage_path, created_at, updated_at, campaigns(name)")
-    .eq("employee_id", profile.id)
+    .eq("employee_id", user.id)
     .order("created_at", { ascending: false });
 
   return (data ?? []) as unknown as CertificateRecord[];

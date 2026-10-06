@@ -1,17 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { employeeNavItems } from "@/constants";
-import { Home, BookOpenCheck, FileText, User, ShieldCheck } from "lucide-react";
+import { getNavigationItemsForRole } from "@/constants";
+import { useAuth } from "@/providers/auth-provider";
+import { Home, BookOpenCheck, FileText, User, ShieldCheck, type LucideIcon } from "lucide-react";
 
-const icons = [Home, BookOpenCheck, FileText, User, ShieldCheck];
+const icons: Record<string, LucideIcon> = {
+  "/today": Home,
+  "/lesson": BookOpenCheck,
+  "/certificates": FileText,
+  "/profile": User,
+  "/admin": ShieldCheck,
+};
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isLoading, user } = useAuth();
+  const navItems = getNavigationItemsForRole(isLoading ? null : user?.role ?? null);
 
   return (
     <nav className="flex gap-2 overflow-x-auto pb-1">
-      {employeeNavItems.map((item, index) => {
-        const Icon = icons[index];
+      {navItems.map((item) => {
+        const Icon = icons[item.href];
         const active = pathname === item.href;
         return (
           <Link
