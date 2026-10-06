@@ -313,6 +313,36 @@ export async function getEmployeeCertificates() {
   return (data ?? []) as unknown as CertificateRecord[];
 }
 
+export async function hasIssuedEmployeeCertificate() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    throw new Error("Could not verify the authenticated user for certificate lookup.");
+  }
+
+  if (!user) {
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("id")
+    .eq("employee_id", user.id)
+    .eq("status", "issued")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Could not check employee certificate availability.");
+  }
+
+  return Boolean(data);
+}
+
 export async function getCompanyCertificates() {
   const supabase = await createServerSupabaseClient();
   const profile = await getCurrentProfile();
