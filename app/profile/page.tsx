@@ -23,13 +23,13 @@ export default function ProfilePage() {
   return (
     <AppShell title="Profile" description="Your employee profile">
       <div className="mx-auto max-w-3xl rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0b3d91] text-lg font-semibold text-white">
             {profile.initials}
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">{profile.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">{profile.role} • {profile.company}</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="break-words text-2xl font-semibold tracking-tight text-slate-900">{profile.name}</h2>
+            <p className="mt-1 break-words text-sm text-slate-500">{profile.role} • {profile.company}</p>
           </div>
         </div>
 
