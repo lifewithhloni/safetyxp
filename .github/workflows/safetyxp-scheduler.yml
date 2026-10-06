@@ -1,0 +1,253 @@
+name: SafetyXP cron scheduler
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+    - cron: "15 5 * * *"
+    - cron: "30 5 * * *"
+    - cron: "45 5 * * *"
+    - cron: "*/15 * * * *"
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Cron job to run
+        required: true
+        type: choice
+        options:
+          - all
+          - daily-missions
+          - risk-analysis
+          - deadline-reminders
+          - certificate-expiry
+          - process-notifications
+          - weekly-summary
+
+jobs:
+  daily-missions:
+    name: Daily missions
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 5 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'daily-missions'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call daily missions endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/daily-missions")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Daily missions endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Daily missions request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Daily missions endpoint returned a non-2xx status."
+            exit 1
+          fi
+
+  risk-analysis:
+    name: Risk analysis
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '15 5 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'risk-analysis'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call risk analysis endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/risk-analysis")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Risk analysis endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Risk analysis request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Risk analysis endpoint returned a non-2xx status."
+            exit 1
+          fi
+
+  deadline-reminders:
+    name: Deadline reminders
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '30 5 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'deadline-reminders'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call deadline reminders endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/deadline-reminders")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Deadline reminders endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Deadline reminders request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Deadline reminders endpoint returned a non-2xx status."
+            exit 1
+          fi
+
+  certificate-expiry:
+    name: Certificate expiry
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '45 5 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'certificate-expiry'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call certificate expiry endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/certificate-expiry")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Certificate expiry endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Certificate expiry request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Certificate expiry endpoint returned a non-2xx status."
+            exit 1
+          fi
+
+  process-notifications:
+    name: Process notifications
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'process-notifications'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call process notifications endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/process-notifications")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Process notifications endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Process notifications request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Process notifications endpoint returned a non-2xx status."
+            exit 1
+          fi
+
+  weekly-summary:
+    name: Weekly summary
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 6 * * 1') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job == 'all' || inputs.job == 'weekly-summary'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call weekly summary endpoint
+        env:
+          SAFETYXP_CRON_SECRET: ${{ secrets.SAFETYXP_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SAFETYXP_CRON_SECRET:-}" ]]; then
+            echo "::error::Repository secret SAFETYXP_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          curl_exit=0
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST \
+            --connect-timeout 10 \
+            --max-time 120 \
+            --header "x-cron-secret: ${SAFETYXP_CRON_SECRET}" \
+            "https://app.safetyxp.co.za/api/cron/weekly-summary")" || curl_exit=$?
+
+          if [[ -z "$status" ]]; then status=000; fi
+          printf 'Weekly summary endpoint returned HTTP %s\n' "$status"
+          if (( curl_exit != 0 )); then
+            echo "::error::Weekly summary request failed (curl exit ${curl_exit})."
+            exit "$curl_exit"
+          fi
+          if [[ ! "$status" =~ ^2[0-9]{2}$ ]]; then
+            echo "::error::Weekly summary endpoint returned a non-2xx status."
+            exit 1
+          fi
