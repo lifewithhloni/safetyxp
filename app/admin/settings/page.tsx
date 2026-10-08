@@ -1,4 +1,5 @@
 import { AdminShell } from "@/features/admin/admin-shell";
+import { PageContainer } from "@/components/admin/page-container";
 import { getCompanyAutomationOverview } from "@/services/automation/automation-settings.service";
 
 export default async function AdminSettingsPage() {
@@ -6,13 +7,14 @@ export default async function AdminSettingsPage() {
 
   return (
     <AdminShell title="Automation Settings" description="Manage compliance reminders, channels, and recent notification history." breadcrumb={["Admin", "Settings"]}>
+      <PageContainer>
       <div className="space-y-6">
-        <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold text-slate-900">Automation</h2>
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="text-2xl font-bold tracking-tight text-[#102a43]">Automation</h2>
           <p className="mt-2 text-sm text-slate-600">These rules drive in-app and email notifications for compliance events.</p>
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600">
+              <thead className="bg-[#f8fafc] text-slate-600">
                 <tr>
                   <th className="px-4 py-3 font-medium">Automation</th>
                   <th className="px-4 py-3 font-medium">Trigger</th>
@@ -38,12 +40,12 @@ export default async function AdminSettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold text-slate-900">Notification History</h2>
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="text-2xl font-bold tracking-tight text-[#102a43]">Notification History</h2>
           <p className="mt-2 text-sm text-slate-600">Recent delivery records for this company.</p>
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600">
+              <thead className="bg-[#f8fafc] text-slate-600">
                 <tr>
                   <th className="px-4 py-3 font-medium">Recipient</th>
                   <th className="px-4 py-3 font-medium">Type</th>
@@ -67,6 +69,7 @@ export default async function AdminSettingsPage() {
           </div>
         </section>
       </div>
+      </PageContainer>
     </AdminShell>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Home, Users, BookOpenCheck, FileText, BarChart3, BadgeCheck, Settings } from "lucide-react";
 import type { AdminNavItem } from "@/types/admin";
 
@@ -24,23 +23,21 @@ export function SidebarItem({ item, active }: SidebarItemProps) {
   const Icon = iconMap[item.icon];
 
   return (
-    <Link href={item.href} className="block">
-      <motion.div
-        whileHover={{ x: 2, scale: 1.01 }}
-        className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 transition ${
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
           active
-            ? "bg-[#0b3d91] text-white shadow-sm"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            ? "bg-[#9bdc28] text-[#102a43]"
+            : "text-slate-200 hover:bg-white/10 hover:text-white"
         }`}
-      >
-        <div className={`rounded-xl p-2 ${active ? "bg-white/15" : "bg-slate-100"}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">{item.label}</p>
-          <p className={`mt-0.5 text-xs ${active ? "text-blue-100" : "text-slate-500"}`}>{item.description}</p>
-        </div>
-      </motion.div>
+    >
+      <Icon className="h-[17px] w-[17px] shrink-0" aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-medium">{item.label}</span>
+        <span className={`mt-0.5 block truncate text-xs font-normal ${active ? "text-[#102a43]/70" : "text-slate-400"}`}>{item.description}</span>
+      </span>
+      {active ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#102a43]" aria-hidden="true" /> : null}
     </Link>
   );
 }

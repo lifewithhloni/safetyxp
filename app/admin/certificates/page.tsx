@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminShell } from "@/features/admin/admin-shell";
+import { PageContainer } from "@/components/admin/page-container";
 import { getCompanyCertificates } from "@/services/certificates/certificate.service";
 
 type AdminCertificateItem = {
@@ -23,16 +24,17 @@ export default async function AdminCertificatesPage() {
 
   return (
     <AdminShell title="Certificates" description="View, verify, and manage company certificates." breadcrumb={["Admin", "Certificates"]}>
+      <PageContainer>
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#0b3d91]">Compliance</p>
-          <h2 className="mt-2 text-3xl font-semibold text-slate-900">Certificates</h2>
+          <p className="text-sm font-semibold text-[#315a12]">Compliance</p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#102a43] sm:text-4xl">Certificates</h2>
         </div>
 
-        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-slate-600">
+              <thead className="bg-[#f8fafc] text-slate-600">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium">Employee</th>
                   <th className="px-4 py-3 text-left font-medium">Campaign</th>
@@ -45,7 +47,7 @@ export default async function AdminCertificatesPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
                 {(certificates as AdminCertificateItem[]).map((item) => (
-                  <tr key={item.id}>
+                  <tr key={item.id} className="transition hover:bg-slate-50">
                     <td className="px-4 py-3">{`${item.profiles?.first_name ?? ""} ${item.profiles?.last_name ?? ""}`.trim() || "Employee"}</td>
                     <td className="px-4 py-3">{item.campaigns?.name ?? "Campaign"}</td>
                     <td className="px-4 py-3">{item.certificate_number}</td>
@@ -54,8 +56,8 @@ export default async function AdminCertificatesPage() {
                     <td className="px-4 py-3 uppercase">{item.status}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
-                        <Link href={`/verify/${item.verification_code}`} className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Verify</Link>
-                        <Link href={`/api/certificates/${item.id}/download`} className="rounded-full bg-[#0b3d91] px-3 py-1.5 text-xs font-semibold text-white">Download</Link>
+                        <Link href={`/verify/${item.verification_code}`} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#102a43] transition hover:border-[#d4e9b4] hover:bg-[#f8fbf4]">Verify</Link>
+                        <Link href={`/api/certificates/${item.id}/download`} className="rounded-xl bg-[#9bdc28] px-3 py-1.5 text-xs font-semibold text-[#102a43] transition hover:bg-[#b6eb6f]">Download</Link>
                       </div>
                     </td>
                   </tr>
@@ -65,6 +67,7 @@ export default async function AdminCertificatesPage() {
           </div>
         </div>
       </div>
+      </PageContainer>
     </AdminShell>
   );
 }

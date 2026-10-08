@@ -34,8 +34,8 @@ export default function ReportsPage() {
     <AdminShell title="Reports & Analytics" description="Monitor compliance across your organisation." breadcrumb={["Admin", "Reports & Analytics"]}>
       <PageContainer>
         <div className="mb-8 flex flex-col gap-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#0b3d91]">Reports & Analytics</p>
-          <h1 className="text-3xl font-semibold text-slate-900">Reports & Analytics</h1>
+          <p className="text-sm font-semibold text-[#315a12]">Reports & Analytics</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-[#102a43] sm:text-4xl">Reports & Analytics</h1>
           <p className="max-w-2xl text-sm text-slate-600">Monitor compliance across your organisation.</p>
         </div>
 
@@ -44,7 +44,7 @@ export default function ReportsPage() {
 
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grid gap-4 xl:grid-cols-3">
             {reportKpis.map((metric) => (
-              <div key={metric.title} className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div key={metric.title} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm text-slate-500">{metric.title}</p>

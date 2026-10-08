@@ -19,10 +19,10 @@ export function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
-      <div className="flex">
+    <div className="min-h-screen bg-[#f4f7fa] text-slate-900">
+      <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <Topbar title={title} description={description} breadcrumb={breadcrumb} onMenuClick={() => setSidebarOpen(true)} />
           <AnimatePresence mode="wait">
             <motion.main

@@ -11,10 +11,10 @@ export function DepartmentCard({ department }: { department: DepartmentPerforman
   } as const;
 
   return (
-    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h4 className="text-lg font-semibold text-slate-900">{department.name}</h4>
+          <h4 className="text-lg font-bold text-[#102a43]">{department.name}</h4>
           <p className="mt-1 text-sm text-slate-500">{department.employees} employees</p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${riskClasses[department.riskLevel]}`}>{department.riskLevel} risk</span>
@@ -25,16 +25,16 @@ export function DepartmentCard({ department }: { department: DepartmentPerforman
           <span>{department.compliance}%</span>
         </div>
         <div className="mt-2 h-2 rounded-full bg-slate-100">
-          <div className="h-2 rounded-full bg-[#0b3d91]" style={{ width: `${department.compliance}%` }} />
+          <div className="h-2 rounded-full bg-[#9bdc28]" style={{ width: `${department.compliance}%` }} />
         </div>
       </div>
       <div className="mt-5 grid gap-2 text-sm text-slate-600">
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="font-semibold text-slate-900">Campaign status</p>
+        <div className="rounded-xl bg-[#f4f7fa] p-3">
+          <p className="font-semibold text-[#102a43]">Campaign status</p>
           <p className="mt-1">{department.campaignStatus}</p>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="font-semibold text-slate-900">Risk level</p>
+        <div className="rounded-xl bg-[#f4f7fa] p-3">
+          <p className="font-semibold text-[#102a43]">Risk level</p>
           <p className="mt-1">{department.riskLevel}</p>
         </div>
       </div>

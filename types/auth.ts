@@ -12,6 +12,7 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
+  avatarUrl?: string | null;
   role: UserRole;
   companyId: string;
   isActive: boolean;

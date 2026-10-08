@@ -5,9 +5,9 @@ import type { AttentionEmployee } from "@/types/reports";
 
 export function EmployeeAttentionTable({ employees }: { employees: AttentionEmployee[] }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
-        <h3 className="text-base font-semibold text-slate-900">Employees requiring attention</h3>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 bg-[#f8fafc] px-5 py-4">
+        <h3 className="text-base font-bold text-[#102a43]">Employees requiring attention</h3>
         <p className="mt-1 text-sm text-slate-500">Key individuals who need intervention or follow-up this period.</p>
       </div>
       <div className="overflow-x-auto">
@@ -24,8 +24,8 @@ export function EmployeeAttentionTable({ employees }: { employees: AttentionEmpl
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
             {employees.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-50">
-                <td className="px-4 py-4 font-semibold text-slate-900">{item.employee}</td>
+              <tr key={item.id} className="transition hover:bg-slate-50">
+                <td className="px-4 py-4 font-semibold text-[#102a43]">{item.employee}</td>
                 <td className="px-4 py-4 text-slate-600">{item.department}</td>
                 <td className="px-4 py-4 text-slate-600">{item.reason}</td>
                 <td className="px-4 py-4 text-slate-600">{item.action}</td>
@@ -36,10 +36,10 @@ export function EmployeeAttentionTable({ employees }: { employees: AttentionEmpl
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    <button type="button" className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-[#d4e9b4] hover:bg-[#f8fbf4]">
                       Send reminder
                     </button>
-                    <button type="button" className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    <button type="button" className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-[#d4e9b4] hover:bg-[#f8fbf4]">
                       View profile
                     </button>
                   </div>

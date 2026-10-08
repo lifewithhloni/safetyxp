@@ -11,14 +11,12 @@ type ProfileRow = {
   first_name: string;
   last_name: string;
   role: UserRole;
+  avatar_url: string | null;
 };
 
 type CompanyRow = {
   id: string;
   name: string;
-  slug: string | null;
-  plan: "basic" | "enterprise" | null;
-  isActive: boolean | null;
 };
 
 const initialAuthState: AuthState = {
@@ -65,7 +63,7 @@ async function getSessionContext() {
 
   const { data: profileData } = await supabaseBrowser
     .from("profiles")
-    .select("id, company_id, email, first_name, last_name, role")
+    .select("id, company_id, email, first_name, last_name, role, avatar_url")
     .eq("id", session.user.id)
     .maybeSingle<ProfileRow>();
 
@@ -76,6 +74,7 @@ async function getSessionContext() {
         id: profile.id,
         email: profile.email,
         fullName: `${profile.first_name} ${profile.last_name}`.trim(),
+        avatarUrl: profile.avatar_url,
         role: (profile.role as UserRole) ?? "employee",
         companyId: profile.company_id,
         isActive: true,
@@ -94,7 +93,7 @@ async function getSessionContext() {
   if (user?.companyId) {
     const { data: companyData } = await supabaseBrowser
       .from("companies")
-      .select("id, name, slug, plan, isActive")
+      .select("id, name")
       .eq("id", user.companyId)
       .maybeSingle<CompanyRow>();
 
@@ -104,9 +103,9 @@ async function getSessionContext() {
       company = {
         id: companyRecord.id,
         name: companyRecord.name,
-        slug: companyRecord.slug ?? companyRecord.name.toLowerCase().replace(/\s+/g, "-"),
-        plan: companyRecord.plan ?? "basic",
-        isActive: companyRecord.isActive ?? true,
+        slug: companyRecord.name.toLowerCase().replace(/\s+/g, "-"),
+        plan: "basic",
+        isActive: true,
       };
     }
   }

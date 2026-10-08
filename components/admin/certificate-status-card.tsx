@@ -11,10 +11,10 @@ const urgencyClasses = {
 
 export function CertificateStatusCard({ certificate }: { certificate: CertificateStatus }) {
   return (
-    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h4 className="text-lg font-semibold text-slate-900">{certificate.title}</h4>
+          <h4 className="text-lg font-bold text-[#102a43]">{certificate.title}</h4>
           <p className="mt-1 text-sm text-slate-500">{certificate.hint}</p>
         </div>
         <span className={`rounded-full px-3 py-1 text-sm font-semibold ${urgencyClasses[certificate.urgency]}`}>{certificate.count}</span>

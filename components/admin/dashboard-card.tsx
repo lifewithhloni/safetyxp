@@ -15,7 +15,7 @@ export function DashboardCard({
     <motion.div
       whileHover={{ y: -2, scale: 1.005 }}
       transition={{ duration: 0.2 }}
-      className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
