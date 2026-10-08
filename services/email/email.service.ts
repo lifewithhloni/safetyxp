@@ -49,11 +49,20 @@ export function getEmailProvider(): EmailProvider {
   return provider === "resend" ? new ResendProvider() : new MockEmailProvider();
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function renderSafetyXpEmailTemplate(input: EmailTemplateInput) {
-  const footer = input.footer ?? "SafetyXP compliance notifications";
-  const companyName = input.companyName ?? "SafetyXP";
+  const footer = escapeHtml(input.footer ?? "SafetyXP compliance notifications");
+  const companyName = escapeHtml(input.companyName ?? "SafetyXP");
   const ctaHtml = input.ctaLabel && input.ctaUrl
-    ? `<p style=\"margin:24px 0;\"><a href=\"${input.ctaUrl}\" style=\"background:#0b3d91;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:600;\">${input.ctaLabel}</a></p>`
+    ? `<p style=\"margin:24px 0;\"><a href=\"${escapeHtml(input.ctaUrl)}\" style=\"background:#0b3d91;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:600;\">${escapeHtml(input.ctaLabel)}</a></p>`
     : "";
 
   return {
@@ -62,15 +71,15 @@ export function renderSafetyXpEmailTemplate(input: EmailTemplateInput) {
       <div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;color:#0f172a;">
         <div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:24px;padding:32px;">
           <p style="margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#0b3d91;">${companyName}</p>
-          <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3;">${input.heading}</h1>
-          ${input.greeting ? `<p style="margin:0 0 12px;">${input.greeting}</p>` : ""}
-          <p style="margin:0 0 12px;line-height:1.6;">${input.message}</p>
+          <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3;">${escapeHtml(input.heading)}</h1>
+          ${input.greeting ? `<p style="margin:0 0 12px;">${escapeHtml(input.greeting)}</p>` : ""}
+          <p style="margin:0 0 12px;line-height:1.6;">${escapeHtml(input.message)}</p>
           ${ctaHtml}
           <p style="margin:24px 0 0;font-size:12px;color:#64748b;">${footer}</p>
         </div>
       </div>
     `,
-    text: [input.heading, input.greeting ?? "", input.message, input.ctaUrl ?? "", footer].filter(Boolean).join("\n\n"),
+    text: [input.heading, input.greeting ?? "", input.message, input.ctaUrl ?? "", input.footer ?? "SafetyXP compliance notifications"].filter(Boolean).join("\n\n"),
   };
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminShell } from "@/features/admin/admin-shell";
 import { PageContainer } from "@/components/admin/page-container";
+import { AddEmployeeDialog } from "@/components/admin/add-employee-dialog";
 import {
   EmployeeAccessError,
   getCompanyEmployeeDirectory,
@@ -61,10 +62,13 @@ export default async function AdminEmployeesPage({
     <AdminShell title="Employees" description="Company employee directory." breadcrumb={["Admin", "Employees"]}>
       <div className="space-y-6">
         <PageContainer>
-        <header>
-          <p className="text-sm font-semibold text-[#315a12]">People</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#102a43] sm:text-4xl">Employees</h2>
-          <p className="mt-2 text-sm text-slate-600">View employee profiles belonging to your company.</p>
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#315a12]">People</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#102a43] sm:text-4xl">Employees</h2>
+            <p className="mt-2 text-sm text-slate-600">View employee profiles belonging to your company.</p>
+          </div>
+          <AddEmployeeDialog departments={directory.departments} />
         </header>
 
         <form method="get" className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_240px_auto] sm:items-end sm:p-5">
