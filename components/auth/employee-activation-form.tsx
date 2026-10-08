@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react";
+import { isPasswordValid, validatePassword } from "@/lib/auth/password-policy";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 const invalidInvitationMessage =
@@ -12,7 +13,7 @@ const activationErrorMessage =
   "We couldn't activate your invitation. Please contact your company administrator.";
 
 type ActivationRouter = {
-  push: (path: string) => void;
+  replace: (path: string) => void;
   refresh: () => void;
 };
 
@@ -48,8 +49,8 @@ export async function submitEmployeeActivation({
     dependencies.setError(invalidInvitationMessage);
     return false;
   }
-  if (password.length < 8) {
-    dependencies.setError("Password must be at least 8 characters long.");
+  if (!isPasswordValid(password)) {
+    dependencies.setError("Please meet all password requirements before continuing.");
     return false;
   }
   if (password !== confirmPassword) {
@@ -101,7 +102,7 @@ export function scheduleActivationRedirect(
   delayMs = 1300
 ) {
   schedule(() => {
-    router.push("/");
+    router.replace("/");
     router.refresh();
   }, delayMs);
 }
@@ -145,6 +146,9 @@ export default function EmployeeActivationForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const passwordPolicy = validatePassword(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const canSubmit = passwordPolicy.valid && passwordsMatch && !isLoading;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -235,17 +239,6 @@ export default function EmployeeActivationForm({
               </p>
             </div>
 
-            <ul className="mt-6 space-y-2 rounded-2xl border border-emerald-100 bg-[#f2fcf7] p-4 text-sm text-slate-600">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="shrink-0 text-[#00a86b]" aria-hidden="true" />
-                At least 8 characters
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="shrink-0 text-[#00a86b]" aria-hidden="true" />
-                Use a unique password
-              </li>
-            </ul>
-
             <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="new-password" className="mb-2 block text-xs font-semibold text-[#172b43] sm:text-sm">
@@ -257,7 +250,7 @@ export default function EmployeeActivationForm({
                     id="new-password"
                     type="password"
                     autoComplete="new-password"
-                    minLength={8}
+                    minLength={12}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-[#fbfcfd] pl-11 pr-4 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#00ae70] focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
@@ -265,6 +258,39 @@ export default function EmployeeActivationForm({
                   />
                 </div>
               </div>
+
+              <section
+                aria-label="Password requirements"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <h3 className="mb-3 text-sm font-semibold text-[#172b43]">Password requirements</h3>
+                <ul className="space-y-2 text-sm">
+                  {([
+                    ["minLength", "At least 12 characters"],
+                    ["uppercase", "One uppercase letter"],
+                    ["lowercase", "One lowercase letter"],
+                    ["number", "One number"],
+                    ["special", "One special character"],
+                    ["noWhitespace", "No spaces"],
+                    ["commonPassword", "Not an obvious/common password"],
+                  ] as const).map(([requirement, label]) => {
+                    const satisfied = requirement === "commonPassword"
+                      ? !passwordPolicy.commonPassword
+                      : passwordPolicy[requirement];
+                    return (
+                      <li
+                        key={requirement}
+                        className={`flex items-center gap-2 ${satisfied ? "text-emerald-700" : "text-slate-500"}`}
+                      >
+                        {satisfied
+                          ? <CheckCircle2 size={16} className="shrink-0" aria-hidden="true" />
+                          : <span aria-hidden="true" className="flex h-4 w-4 shrink-0 items-center justify-center text-base leading-none">○</span>}
+                        {label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
 
               <div>
                 <label htmlFor="confirm-password" className="mb-2 block text-xs font-semibold text-[#172b43] sm:text-sm">
@@ -276,13 +302,20 @@ export default function EmployeeActivationForm({
                     id="confirm-password"
                     type="password"
                     autoComplete="new-password"
-                    minLength={8}
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-[#fbfcfd] pl-11 pr-4 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-[#00ae70] focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                     required
                   />
                 </div>
+                {confirmPassword.length > 0 ? (
+                  <p
+                    role="status"
+                    className={`mt-2 text-sm ${passwordsMatch ? "text-emerald-700" : "text-slate-600"}`}
+                  >
+                    {passwordsMatch ? "Passwords match." : "Passwords do not match."}
+                  </p>
+                ) : null}
               </div>
 
               {error ? (
@@ -293,7 +326,7 @@ export default function EmployeeActivationForm({
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={!canSubmit}
                 className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00b96b] to-[#00a968] px-5 py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(0,169,104,0.2)] transition hover:from-[#00a963] hover:to-[#008f59] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-65"
               >
                 {isLoading ? "Creating your account..." : "Create account"}

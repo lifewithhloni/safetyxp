@@ -36,8 +36,8 @@ async function submit(
   return submitEmployeeActivation({
     invitationId: values.invitationId === undefined ? validInvitationId : values.invitationId,
     tokenHash: values.tokenHash === undefined ? "invite-token-hash" : values.tokenHash,
-    password: values.password ?? "unique-password",
-    confirmPassword: values.confirmPassword ?? "unique-password",
+    password: values.password ?? "N0rth!River#47",
+    confirmPassword: values.confirmPassword ?? "N0rth!River#47",
     dependencies,
   });
 }
@@ -66,22 +66,34 @@ describe("employee invitation activation", () => {
     expect(dependencies.updatePassword).not.toHaveBeenCalled();
   });
 
-  it("rejects a password shorter than eight characters", async () => {
+  it("blocks submission when the password policy is incomplete", async () => {
     const dependencies = createDependencies();
 
     await submit(dependencies, { password: "short", confirmPassword: "short" });
 
     expect(dependencies.verifyOtp).not.toHaveBeenCalled();
-    expect(dependencies.setError).toHaveBeenLastCalledWith("Password must be at least 8 characters long.");
+    expect(dependencies.setError).toHaveBeenLastCalledWith("Please meet all password requirements before continuing.");
   });
 
   it("rejects a password confirmation mismatch", async () => {
     const dependencies = createDependencies();
 
-    await submit(dependencies, { confirmPassword: "different-password" });
+    await submit(dependencies, { confirmPassword: "Different!Pass47" });
 
     expect(dependencies.verifyOtp).not.toHaveBeenCalled();
     expect(dependencies.setError).toHaveBeenLastCalledWith("Passwords do not match.");
+  });
+
+  it("does not call verifyOtp for a common password even when confirmation matches", async () => {
+    const dependencies = createDependencies();
+
+    await submit(dependencies, {
+      password: "Password123!",
+      confirmPassword: "Password123!",
+    });
+
+    expect(dependencies.verifyOtp).not.toHaveBeenCalled();
+    expect(dependencies.setError).toHaveBeenLastCalledWith("Please meet all password requirements before continuing.");
   });
 
   it("shows a friendly expired-invitation message when verifyOtp fails", async () => {
@@ -121,7 +133,7 @@ describe("employee invitation activation", () => {
 
     await submit(dependencies);
 
-    expect(dependencies.updatePassword).toHaveBeenCalledWith("unique-password");
+    expect(dependencies.updatePassword).toHaveBeenCalledWith("N0rth!River#47");
     expect(dependencies.acceptInvitation).toHaveBeenCalledWith(validInvitationId);
     expect(dependencies.onSuccess).not.toHaveBeenCalled();
     expect(dependencies.navigateHome).not.toHaveBeenCalled();
@@ -133,7 +145,7 @@ describe("employee invitation activation", () => {
   it("activates successfully, displays confirmation, and redirects to the role-aware root", async () => {
     const dependencies = createDependencies();
     const router = {
-      push: jest.fn<(path: string) => void>(),
+      replace: jest.fn<(path: string) => void>(),
       refresh: jest.fn<() => void>(),
     };
     let redirectCallback: (() => void) | undefined;
@@ -150,7 +162,7 @@ describe("employee invitation activation", () => {
     await expect(submit(dependencies)).resolves.toBe(true);
 
     expect(dependencies.verifyOtp).toHaveBeenCalledWith("invite-token-hash");
-    expect(dependencies.updatePassword).toHaveBeenCalledWith("unique-password");
+    expect(dependencies.updatePassword).toHaveBeenCalledWith("N0rth!River#47");
     expect(dependencies.acceptInvitation).toHaveBeenCalledWith(validInvitationId);
     expect(dependencies.onSuccess).toHaveBeenCalledTimes(1);
     expect(redirectDelay).toBe(1300);
@@ -159,7 +171,7 @@ describe("employee invitation activation", () => {
     );
 
     redirectCallback?.();
-    expect(router.push).toHaveBeenCalledWith("/");
+    expect(router.replace).toHaveBeenCalledWith("/");
     expect(router.refresh).toHaveBeenCalledTimes(1);
   });
 });
