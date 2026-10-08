@@ -262,6 +262,12 @@ describe("Company Admin employee provisioning", () => {
         redirectTo: expect.stringContaining("/auth/confirm?next="),
       }),
     }));
+    const emailPayload = jest.mocked(sendTemplatedEmail).mock.calls[0]?.[0];
+    const activationUrl = new URL(emailPayload?.ctaUrl ?? "https://invalid.example");
+    expect(activationUrl.pathname).toBe("/activate");
+    expect(activationUrl.searchParams.get("invitation")).toBe(invitationInserts[0]?.id);
+    expect(activationUrl.searchParams.get("token_hash")).toBe("stored-auth-token-hash");
+    expect(emailPayload?.ctaUrl).not.toBe("https://auth.example.test/invite?token=one");
   });
 
   it("continues to select an existing company department without creating one", async () => {

@@ -371,6 +371,9 @@ async function provisionEmployeeForAdmin(
     if (linkError || !linkData.properties?.action_link || !linkData.properties.hashed_token) {
       throw new EmployeeProvisioningError("database", "Could not generate a secure employee invitation.");
     }
+    const activationUrl = new URL("/activate", applicationUrl);
+    activationUrl.searchParams.set("invitation", invitationId);
+    activationUrl.searchParams.set("token_hash", linkData.properties.hashed_token);
 
     const expiresAt = new Date(Date.now() + invitationLifetimeMs).toISOString();
     stage = "invitation_persistence";
@@ -398,7 +401,7 @@ async function provisionEmployeeForAdmin(
       greeting: `Hello ${employee.firstName},`,
       message: "Your company has created your SafetyXP employee account. Open the invitation to create your password, then sign in to get started.",
       ctaLabel: "Create your password",
-      ctaUrl: linkData.properties.action_link,
+      ctaUrl: activationUrl.toString(),
     });
 
     if (!delivery.success) {
