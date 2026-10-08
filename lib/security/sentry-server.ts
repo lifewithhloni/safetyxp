@@ -15,10 +15,11 @@ const allowedTagKeys = new Set([
   "attempt",
   "runtime",
   "job_id",
+  "attempt_id",
 ]);
 
 export type SentryTechnicalContext = Partial<Record<
-  "component" | "operation" | "failure_scope" | "job_name" | "channel" | "provider" | "file_type" | "outcome" | "error_code" | "attempt" | "runtime" | "job_id",
+  "component" | "operation" | "failure_scope" | "job_name" | "channel" | "provider" | "file_type" | "outcome" | "error_code" | "attempt" | "runtime" | "job_id" | "attempt_id",
   string | number
 >>;
 

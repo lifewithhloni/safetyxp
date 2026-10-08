@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { reportServerError } from "@/lib/security/sentry-server";
 import * as employeeManagement from "@/services/admin/employee-management.service";
 import { EmployeeAccessError, getCompanyAdminSupabase } from "@/services/admin/employee-management.service";
 import { sendTemplatedEmail } from "@/services/email/email.service";
@@ -7,6 +8,10 @@ import {
   createCompanyEmployee,
   importCompanyEmployees,
 } from "./employee-provisioning.service";
+
+jest.mock("@/lib/security/sentry-server", () => ({
+  reportServerError: jest.fn(),
+}));
 
 jest.mock("@/lib/supabase/admin", () => ({
   supabaseAdmin: {
@@ -44,6 +49,7 @@ let departmentExists: boolean;
 let nextAuthId: number;
 let nextDepartmentId: number;
 let simulateDepartmentInsertConflict: boolean;
+let consoleError: jest.SpiedFunction<typeof console.error>;
 
 class QueryBuilder implements PromiseLike<QueryResult> {
   private operation: QueryOperation = "select";
@@ -165,6 +171,7 @@ function setupAdmin() {
 describe("Company Admin employee provisioning", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
     existingProfiles.splice(0);
     profileInserts.splice(0);
     invitationInserts.splice(0);
@@ -207,6 +214,10 @@ describe("Company Admin employee provisioning", () => {
       success: true,
       provider: "mock",
     });
+  });
+
+  afterEach(() => {
+    consoleError.mockRestore();
   });
 
   it("creates a company-scoped Auth user, profile, and persisted invitation", async () => {
@@ -396,6 +407,58 @@ describe("Company Admin employee provisioning", () => {
       table: "employee_invitations",
       value: { status: "REVOKED" },
     });
+  });
+
+  it("captures the safe failure stage and rolls back without logging sensitive exception data", async () => {
+    const originalError = new Error(
+      "Invite failure for ari@example.test: Authorization: Bearer topsecret access_token=private sk_safesecretvalue password=secretpass https://internal.example/path?token=hidden"
+    );
+    jest.mocked(supabaseAdmin.auth.admin.generateLink).mockRejectedValue(originalError);
+
+    await expect(createCompanyEmployee(validEmployee)).rejects.toMatchObject({
+      name: "EmployeeProvisioningError",
+      message: expect.stringMatching(/^Employee setup failed and the created account was removed\. Reference: [a-f0-9]{8}$/),
+    });
+
+    expect(supabaseAdmin.auth.admin.deleteUser).toHaveBeenCalledWith("employee-1");
+    expect(profileInserts).toHaveLength(1);
+    expect(invitationInserts).toHaveLength(0);
+    expect(reportServerError).toHaveBeenCalledWith(
+      originalError,
+      expect.objectContaining({
+        component: "employee-provisioning",
+        operation: "create_employee",
+        failure_scope: "invitation_link_generation",
+        attempt_id: expect.any(String),
+      })
+    );
+
+    const logCall = consoleError.mock.calls[0]?.[0];
+    expect(typeof logCall).toBe("string");
+    const diagnostic = JSON.parse(String(logCall)) as Record<string, unknown>;
+    expect(diagnostic).toMatchObject({
+      event: "employee_provisioning_failed",
+      stage: "invitation_link_generation",
+      errorName: "Error",
+      authUserCreated: true,
+      profileCreated: true,
+      invitationPersisted: false,
+      emailSendingStarted: false,
+      rollbackAttempted: true,
+      rollbackCompleted: true,
+    });
+    expect(diagnostic.errorMessage).toContain("[email redacted]");
+    for (const secret of [
+      "ari@example.test",
+      "topsecret",
+      "private",
+      "sk_safesecretvalue",
+      "secretpass",
+      "internal.example",
+      "hidden",
+    ]) {
+      expect(String(logCall)).not.toContain(secret);
+    }
   });
 
   it("imports valid rows while reporting invalid and already-existing rows", async () => {

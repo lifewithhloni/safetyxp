@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { reportServerError } from "@/lib/security/sentry-server";
 import { getCompanyAdminSupabase, EmployeeAccessError } from "@/services/admin/employee-management.service";
 import { sendTemplatedEmail } from "@/services/email/email.service";
 import {
@@ -32,6 +33,81 @@ type ManualEmployeeInput = EmployeeCsvData & {
   departmentId: string | null;
   newDepartmentName?: string | null;
 };
+
+type ProvisioningDiagnostic = {
+  attemptId: string;
+  stage: string;
+  error: unknown;
+  authUserCreated: boolean;
+  profileCreated: boolean;
+  invitationPersisted: boolean;
+  emailSendingStarted: boolean;
+  rollbackAttempted: boolean;
+  rollbackCompleted: boolean;
+  rollbackError?: unknown;
+};
+
+function safeDiagnosticValue(error: unknown) {
+  const errorName = error instanceof Error
+    ? error.name
+    : error && typeof error === "object" && "name" in error && typeof error.name === "string"
+      ? error.name
+      : "Error";
+  const errorMessage = error instanceof Error
+    ? error.message
+    : error && typeof error === "object" && "message" in error && typeof error.message === "string"
+      ? error.message
+      : "Unknown provisioning failure.";
+
+  const safeName = errorName.replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 80) || "Error";
+  const safeMessage = errorMessage
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email redacted]")
+    .replace(/\b(?:sk|rk|re|sb_secret|sb_publishable)_[A-Za-z0-9_-]{8,}\b/gi, "[key redacted]")
+    .replace(/Bearer\s+[^\s,;]+/gi, "Bearer [redacted]")
+    .replace(/\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g, "[token redacted]")
+    .replace(/https?:\/\/[^\s"'<>]+/gi, "[URL redacted]")
+    .replace(/(password|authorization|cookie|secret|token|api[_ -]?key|service[_ -]?role)(:|=)[^\s,;]+/gi, "$1$2[redacted]")
+    .slice(0, 500);
+
+  return { errorName: safeName, errorMessage: safeMessage };
+}
+
+function logProvisioningDiagnostic(diagnostic: ProvisioningDiagnostic) {
+  const { errorName, errorMessage } = safeDiagnosticValue(diagnostic.error);
+  const rollbackFailure = diagnostic.rollbackError
+    ? safeDiagnosticValue(diagnostic.rollbackError)
+    : undefined;
+  const context = {
+    component: "employee-provisioning",
+    operation: "create_employee",
+    failure_scope: diagnostic.stage,
+    outcome: diagnostic.rollbackCompleted ? "rolled_back" : "rollback_incomplete",
+    attempt_id: diagnostic.attemptId,
+  };
+
+  reportServerError(diagnostic.error, context);
+  if (diagnostic.rollbackError) {
+    reportServerError(diagnostic.rollbackError, {
+      ...context,
+      failure_scope: "rollback",
+    });
+  }
+
+  console.error(JSON.stringify({
+    event: "employee_provisioning_failed",
+    attemptId: diagnostic.attemptId,
+    stage: diagnostic.stage,
+    errorName,
+    errorMessage,
+    authUserCreated: diagnostic.authUserCreated,
+    profileCreated: diagnostic.profileCreated,
+    invitationPersisted: diagnostic.invitationPersisted,
+    emailSendingStarted: diagnostic.emailSendingStarted,
+    rollbackAttempted: diagnostic.rollbackAttempted,
+    rollbackCompleted: diagnostic.rollbackCompleted,
+    ...(rollbackFailure ? { rollbackErrorName: rollbackFailure.errorName, rollbackErrorMessage: rollbackFailure.errorMessage } : {}),
+  }));
+}
 
 function normalizeManualEmployee(input: ManualEmployeeInput): ManualEmployeeInput {
   const firstName = input.firstName.trim();
@@ -252,7 +328,12 @@ async function provisionEmployeeForAdmin(
   }
 
   const userId = authData.user.id;
+  const attemptId = randomUUID();
   let invitationId: string | null = null;
+  let stage = "profile_creation";
+  let profileCreated = false;
+  let invitationPersisted = false;
+  let emailSendingStarted = false;
 
   try {
     const { error: profileError } = await supabaseAdmin.from("profiles").insert({
@@ -275,10 +356,12 @@ async function provisionEmployeeForAdmin(
           : "Could not create the employee profile."
       );
     }
+    profileCreated = true;
 
     invitationId = randomUUID();
     const confirmUrl = new URL("/auth/confirm", applicationUrl);
     confirmUrl.searchParams.set("next", `/reset-password?invitation=${invitationId}`);
+    stage = "invitation_link_generation";
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: "invite",
       email: employee.email,
@@ -290,6 +373,7 @@ async function provisionEmployeeForAdmin(
     }
 
     const expiresAt = new Date(Date.now() + invitationLifetimeMs).toISOString();
+    stage = "invitation_persistence";
     const { error: invitationError } = await supabaseAdmin.from("employee_invitations").insert({
       id: invitationId,
       company_id: admin.company_id,
@@ -304,7 +388,10 @@ async function provisionEmployeeForAdmin(
     if (invitationError) {
       throw new EmployeeProvisioningError("database", "Could not persist the employee invitation.");
     }
+    invitationPersisted = true;
 
+    stage = "email_provider_selection_and_send";
+    emailSendingStarted = true;
     const delivery = await sendTemplatedEmail({
       to: employee.email,
       heading: "You're invited to SafetyXP",
@@ -326,11 +413,37 @@ async function provisionEmployeeForAdmin(
       emailProvider: delivery.provider,
     };
   } catch (error) {
-    await compensateEmployeeCreation(userId, invitationId);
+    let rollbackCompleted = false;
+    let rollbackError: unknown;
+    try {
+      await compensateEmployeeCreation(userId, invitationId);
+      rollbackCompleted = true;
+    } catch (cleanupError) {
+      rollbackError = cleanupError;
+    }
+    logProvisioningDiagnostic({
+      attemptId,
+      stage,
+      error,
+      authUserCreated: true,
+      profileCreated,
+      invitationPersisted,
+      emailSendingStarted,
+      rollbackAttempted: true,
+      rollbackCompleted,
+      ...(rollbackError ? { rollbackError } : {}),
+    });
+    if (rollbackError) {
+      throw rollbackError;
+    }
+
     if (error instanceof EmployeeProvisioningError || error instanceof EmployeeAccessError) {
       throw error;
     }
-    throw new EmployeeProvisioningError("database", "Employee setup failed and the created account was removed.");
+    throw new EmployeeProvisioningError(
+      "database",
+      `Employee setup failed and the created account was removed. Reference: ${attemptId.slice(0, 8)}`
+    );
   }
 }
 

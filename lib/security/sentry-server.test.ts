@@ -16,10 +16,16 @@ describe("server Sentry reporting", () => {
       component: "cron",
       job_name: "daily-missions",
       attempt: 2,
+      attempt_id: "attempt-123",
       company_id: "not-allowed",
     } as never);
 
-    expect(setTags).toHaveBeenCalledWith({ component: "cron", job_name: "daily-missions", attempt: "2" });
+    expect(setTags).toHaveBeenCalledWith({
+      component: "cron",
+      job_name: "daily-missions",
+      attempt: "2",
+      attempt_id: "attempt-123",
+    });
     expect(captureException).toHaveBeenCalledTimes(1);
     const captured = captureException.mock.calls[0]?.[0];
 
