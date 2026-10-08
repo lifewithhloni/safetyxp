@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Plus, RefreshCw } from "lucide-react";
 import type { CampaignRecord } from "@/services/admin/campaign-management.service";
 
@@ -132,6 +133,12 @@ export function CampaignDirectoryView({
                 </div>
                 <CampaignStatusBadge status={campaign.status} />
               </div>
+              <Link
+                href={`/admin/learning-campaigns/${encodeURIComponent(campaign.id)}`}
+                className="mt-4 inline-flex min-h-10 items-center rounded-lg px-1 text-sm font-semibold text-[#0b3d91] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-700"
+              >
+                View Campaign <span aria-hidden="true" className="ml-2">→</span>
+              </Link>
               <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-3">
                 <div>
                   <dt className="text-slate-500">Official deadline</dt>

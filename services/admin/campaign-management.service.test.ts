@@ -269,6 +269,7 @@ describe("company-scoped campaign management", () => {
     const result = await createLearningModules("campaign-a", moduleInput);
 
     expect(result).toMatchObject([{
+      id: "learning_modules-inserted-1",
       campaign_id: "campaign-a",
       title: "Introduction",
       description: "Start here",
@@ -290,6 +291,47 @@ describe("company-scoped campaign management", () => {
     await expect(createLearningModules("campaign-other", [{ title: "Unsafe module" }])).rejects.toMatchObject({
       code: "not_found",
     });
+    expect(insertedRows).toHaveLength(0);
+  });
+
+  it("rejects unauthenticated and non-admin module creation", async () => {
+    getCompanyAdminSupabase.mockRejectedValue(new EmployeeAccessError("unauthenticated"));
+    await expect(createLearningModules("campaign-a", [{ title: "Introduction" }]))
+      .rejects.toBeInstanceOf(EmployeeAccessError);
+    expect(insertedRows).toHaveLength(0);
+
+    profile = { ...adminProfile, role: "employee" };
+    setupAdmin();
+    await expect(createLearningModules("campaign-a", [{ title: "Introduction" }]))
+      .rejects.toMatchObject({ reason: "forbidden" });
+    expect(insertedRows).toHaveLength(0);
+  });
+
+  it("ignores client company and status values and persists the module as draft", async () => {
+    const untrustedInput = {
+      title: "First aid",
+      company_id: "company-b",
+      status: "published",
+    } as unknown as CreateLearningModuleInput;
+
+    const result = await createLearningModules("campaign-a", [untrustedInput]);
+
+    expect(result[0]).toMatchObject({
+      id: "learning_modules-inserted-1",
+      campaign_id: "campaign-a",
+      status: "draft",
+    });
+    expect(insertedRows[0]?.values[0]).not.toHaveProperty("company_id");
+    expect(insertedRows[0]?.values[0]).not.toHaveProperty("status", "published");
+  });
+
+  it("rejects invalid module input before attempting persistence", async () => {
+    await expect(createLearningModules("campaign-a", [{ title: "  " }]))
+      .rejects.toMatchObject({ code: "invalid" });
+    await expect(createLearningModules("campaign-a", [{
+      title: "Introduction",
+      estimatedMinutes: -1,
+    }])).rejects.toMatchObject({ code: "invalid" });
     expect(insertedRows).toHaveLength(0);
   });
 

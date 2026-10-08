@@ -46,6 +46,8 @@ describe("company campaign directory", () => {
     expect(markup).toContain("2026-12-31");
     expect(markup).toContain("2026-12-29");
     expect(markup).toContain("2 days");
+    expect(markup).toContain('href="/admin/learning-campaigns/persisted-campaign-id"');
+    expect(markup).toContain("View Campaign");
     expect(markup).not.toMatch(/employees|completion|participants|progress|certificates|risk score|modules/i);
   });
 
