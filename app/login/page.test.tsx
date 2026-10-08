@@ -16,9 +16,9 @@ function createLoginState() {
 }
 
 describe("login submission", () => {
-  it("preserves a requested redirect and defaults to today", () => {
+  it("preserves a requested redirect and defaults to the role-aware root route", () => {
     expect(getLoginRedirect(new URLSearchParams("redirect=%2Ftoday"))).toBe("/today");
-    expect(getLoginRedirect(new URLSearchParams())).toBe("/today");
+    expect(getLoginRedirect(new URLSearchParams())).toBe("/");
     expect(getLoginRedirect(new URLSearchParams("redirect=%2Fprofile"))).toBe("/profile");
   });
 

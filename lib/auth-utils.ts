@@ -35,8 +35,20 @@ export const adminOnlyRoutes = [
   "/admin/settings",
 ];
 
+export function isAdminRole(role: string | null | undefined) {
+  return role === "admin" || role === "super_admin";
+}
+
+export function isAdminRoutePath(pathname: string) {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+export function isProtectedRoutePath(pathname: string) {
+  return isAdminRoutePath(pathname) || protectedRoutes.includes(pathname);
+}
+
 export function getRedirectTargetForRole(role: UserRole | null | undefined) {
-  if (role === "admin" || role === "super_admin") {
+  if (isAdminRole(role)) {
     return "/admin/dashboard";
   }
 
@@ -48,8 +60,8 @@ export function canAccessRoute(context: AuthContext, pathname: string) {
     return false;
   }
 
-  if (pathname.startsWith("/admin")) {
-    return context.profile.role === "admin" || context.profile.role === "super_admin";
+  if (isAdminRoutePath(pathname)) {
+    return isAdminRole(context.profile.role);
   }
 
   return true;

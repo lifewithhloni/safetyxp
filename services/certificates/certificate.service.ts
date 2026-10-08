@@ -9,6 +9,7 @@ import {
   type CertificateProgressSnapshot,
   type CertificateRequirementConfig,
 } from "./certificate-eligibility.service";
+import type { EmployeeCertificate } from "@/types/admin-employee";
 
 export type CertificateRecord = {
   id: string;
@@ -358,6 +359,44 @@ export async function getCompanyCertificates() {
     .order("created_at", { ascending: false });
 
   return (data ?? []) as unknown as CertificateRecord[];
+}
+
+export async function getCompanyEmployeeCertificates(employeeId: string) {
+  const supabase = await createServerSupabaseClient();
+  const profile = await getCurrentProfile();
+
+  if (!profile || (profile.role !== "admin" && profile.role !== "super_admin")) {
+    throw new Error("Unauthorized to view company certificates.");
+  }
+
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("id, company_id, employee_id, campaign_id, certificate_number, issued_at, expires_at, status, verification_code, storage_path, created_at, updated_at, campaigns(name)")
+    .eq("company_id", profile.company_id)
+    .eq("employee_id", employeeId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error("Could not load employee certificates.");
+  }
+
+  const records = (data ?? []) as unknown as Array<CertificateRecord & {
+    campaigns?: { name?: string } | Array<{ name?: string }> | null;
+  }>;
+
+  return records.map((certificate): EmployeeCertificate => {
+    const campaign = Array.isArray(certificate.campaigns)
+      ? certificate.campaigns[0]
+      : certificate.campaigns;
+
+    return {
+      id: certificate.id,
+      campaignName: campaign?.name ?? null,
+      status: certificate.status,
+      issuedAt: certificate.issued_at,
+      expiresAt: certificate.expires_at,
+    };
+  });
 }
 
 export async function getCertificate(certificateId: string) {

@@ -22,7 +22,7 @@ type LoginResult = {
 };
 
 export function getLoginRedirect(searchParams: Pick<URLSearchParams, "get">) {
-  return searchParams.get("redirect") || "/today";
+  return searchParams.get("redirect") || "/";
 }
 
 export async function submitLogin({
