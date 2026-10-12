@@ -48,7 +48,8 @@ describe("campaign detail", () => {
     expect(markup).toContain("Initial response procedures");
     expect(markup).toContain("15 minutes");
     expect(markup).toContain("persisted-module-id");
-    expect(markup).not.toMatch(/employees|completion|participants|progress|certificates|risk score|assignment/i);
+    expect(markup).toContain("Employee assignments");
+    expect(markup).not.toMatch(/completion|progress|certificates|risk score/i);
   });
 
   it("shows an honest empty-module state without sample content", () => {
