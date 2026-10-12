@@ -4,6 +4,7 @@ import type {
   LearningModuleRecord,
 } from "@/services/admin/campaign-management.service";
 import { CampaignModuleManager } from "@/components/admin/campaign-module-manager";
+import { CampaignAssignmentManager } from "@/components/admin/campaign-assignment-manager";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -75,6 +76,7 @@ export function CampaignDetail({
         </dl>
       </section>
 
+      <CampaignAssignmentManager campaignId={campaign.id} />
       <CampaignModuleManager campaignId={campaign.id} initialModules={modules} />
     </div>
   );
