@@ -45,3 +45,6 @@ next-env.d.ts
 
 .vercel
 .env*
+docs/security-live-rls-results.json
+
+supabase/.temp/
