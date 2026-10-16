@@ -5,6 +5,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 // ---------------------------------------------------------------------------
 
 import { budgetSourceText, SOURCE_TEXT_CHAR_BUDGET } from "./ai-job.service";
+import { OpenAIProvider } from "@/services/ai/providers/openai.provider";
 
 describe("budgetSourceText", () => {
   it("returns text unchanged when under budget", () => {
@@ -51,7 +52,6 @@ describe("budgetSourceText", () => {
 describe("OpenAIProvider — Responses API structure", () => {
   it("instantiates with a dummy key and exposes all required provider methods", () => {
     // Importing directly to confirm the constructor path (no network call).
-    const { OpenAIProvider } = require("@/services/ai/providers/openai.provider");
     const provider = new OpenAIProvider("sk-test-dummy-key", "gpt-4.1-mini");
 
     // Confirm every interface method exists — these all call client.responses.create internally
@@ -67,12 +67,11 @@ describe("OpenAIProvider — Responses API structure", () => {
   });
 
   it("returns success:false (never throws) when the API call fails", async () => {
-    const { OpenAIProvider } = require("@/services/ai/providers/openai.provider");
     const provider = new OpenAIProvider("sk-test-dummy-key", "gpt-4.1-mini");
 
     // Monkey-patch the private requestJson to simulate an API error.
     // This confirms the try/catch wrapping without making a real request.
-    (provider as Record<string, unknown>).requestJson = jest.fn<() => Promise<never>>().mockRejectedValue(
+    (provider as unknown as Record<string, unknown>).requestJson = jest.fn<() => Promise<never>>().mockRejectedValue(
       new Error("OpenAI API error: insufficient_quota")
     );
 

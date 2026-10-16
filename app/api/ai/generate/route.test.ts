@@ -14,7 +14,7 @@ const safeForbiddenOrNotFound = jest.fn(() =>
   Response.json({ error: "Not found." }, { status: 404 })
 ) as jest.MockedFunction<() => Response>;
 
-const createServerSupabaseClient = jest.fn() as jest.MockedFunction<() => Promise<{ from: (table: string) => any }>>;
+const createServerSupabaseClient = jest.fn() as jest.MockedFunction<() => Promise<{ from: (table: string) => unknown }>>;
 const canTriggerAiGeneration = jest.fn() as jest.MockedFunction<() => boolean>;
 const createAiGenerationJob = jest.fn() as jest.MockedFunction<() => Promise<{ jobId: string }>>;
 const processAiGenerationJob = jest.fn() as jest.MockedFunction<() => Promise<void>>;
@@ -57,8 +57,8 @@ function makeRequest(body: Record<string, unknown>) {
 
 function makeQuery(data: Record<string, unknown> | null) {
   return {
-    select: jest.fn().mockReturnThis() as jest.MockedFunction<() => any>,
-    eq: jest.fn().mockReturnThis() as jest.MockedFunction<() => any>,
+    select: jest.fn().mockReturnThis() as jest.MockedFunction<() => unknown>,
+    eq: jest.fn().mockReturnThis() as jest.MockedFunction<() => unknown>,
     maybeSingle: jest.fn(async () => ({ data, error: null })) as jest.MockedFunction<() => Promise<{ data: Record<string, unknown> | null; error: null }>>,
   };
 }

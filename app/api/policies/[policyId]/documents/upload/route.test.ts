@@ -15,9 +15,9 @@ const safeForbiddenOrNotFound = jest.fn(() =>
 ) as jest.MockedFunction<() => Response>;
 
 const supabaseAdmin = {
-  from: jest.fn() as jest.MockedFunction<(table: string) => any>,
+  from: jest.fn() as jest.MockedFunction<(table: string) => unknown>,
   storage: {
-    from: jest.fn() as jest.MockedFunction<(bucket: string) => any>,
+    from: jest.fn() as jest.MockedFunction<(bucket: string) => unknown>,
   },
 };
 const extractAndPersistDocumentText = jest.fn() as jest.MockedFunction<() => Promise<{ text: string }>>;
@@ -66,8 +66,8 @@ function makeUploadRequest(file: File) {
 
 function makePolicyQuery(data: Record<string, unknown> | null) {
   return {
-    select: jest.fn().mockReturnThis() as jest.MockedFunction<() => any>,
-    eq: jest.fn().mockReturnThis() as jest.MockedFunction<() => any>,
+    select: jest.fn().mockReturnThis() as jest.MockedFunction<() => unknown>,
+    eq: jest.fn().mockReturnThis() as jest.MockedFunction<() => unknown>,
     maybeSingle: jest.fn(async () => ({ data, error: null })) as jest.MockedFunction<() => Promise<{ data: Record<string, unknown> | null; error: null }>>,
   };
 }

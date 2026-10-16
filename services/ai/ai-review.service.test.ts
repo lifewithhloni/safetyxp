@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 
-const getCurrentProfile: any = jest.fn();
-const createServerSupabaseClient: any = jest.fn();
-const supabaseAdminFrom: any = jest.fn();
+const getCurrentProfile = jest.fn<() => Promise<unknown>>();
+const createServerSupabaseClient = jest.fn<() => Promise<unknown>>();
+const supabaseAdminFrom = jest.fn<(table: string) => unknown>();
 
 jest.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient,
@@ -94,11 +94,11 @@ describe("ai review authorization and publication behavior", () => {
 
     expect(generatedContentClient.update).toHaveBeenCalledTimes(1);
     expect(generatedContentClient.update).toHaveBeenCalledWith({ status: "APPROVED", updated_at: expect.any(String) });
-    const updatePayload = ((generatedContentClient.update as any).mock.calls[0] ?? [])[0] as Record<string, unknown>;
+    const updatePayload = ((generatedContentClient.update.mock.calls[0] as unknown[] | undefined) ?? [])[0] as Record<string, unknown>;
     expect(Object.keys(updatePayload).sort()).toEqual(["status", "updated_at"]);
     expect(contentReviewsInsert).toHaveBeenCalledTimes(1);
 
-    const payload = ((contentReviewsInsert as any).mock.calls[0] ?? [])[0] as Record<string, unknown>;
+    const payload = ((contentReviewsInsert.mock.calls[0] as unknown[] | undefined) ?? [])[0] as Record<string, unknown>;
     expect(payload).toEqual({
       generated_content_id: content.id,
       reviewer_id: profile.id,
@@ -133,7 +133,7 @@ describe("ai review authorization and publication behavior", () => {
         reviewed_at: expect.any(String),
       })
     );
-    const payload = ((contentReviewsInsert as any).mock.calls[0] ?? [])[0] as Record<string, unknown>;
+    const payload = ((contentReviewsInsert.mock.calls[0] as unknown[] | undefined) ?? [])[0] as Record<string, unknown>;
     const keys = Object.keys(payload as Record<string, unknown>);
     expect(keys.sort()).toEqual(["generated_content_id", "notes", "reviewed_at", "reviewer_id", "status"].sort());
   });
@@ -185,10 +185,10 @@ describe("ai review authorization and publication behavior", () => {
     const rejectedClient = buildGeneratedContentClient(rejectedContent, { id: rejectedContent.id, status: "PUBLISHED" });
     const pendingClient = buildGeneratedContentClient(underReviewContent, { id: underReviewContent.id, status: "PUBLISHED" });
 
-    (createServerSupabaseClient as any).mockImplementationOnce(async () => rejectedClient.client);
+    createServerSupabaseClient.mockImplementationOnce(async () => rejectedClient.client);
     await expect(publishGeneratedContent(rejectedContent.id)).rejects.toThrow("Only approved content can be published.");
 
-    (createServerSupabaseClient as any).mockImplementationOnce(async () => pendingClient.client);
+    createServerSupabaseClient.mockImplementationOnce(async () => pendingClient.client);
     await expect(publishGeneratedContent(underReviewContent.id)).rejects.toThrow("Only approved content can be published.");
   });
 
@@ -244,7 +244,7 @@ describe("ai review authorization and publication behavior", () => {
 
     await approveGeneratedContent(content.id, "Audit clean");
 
-    const payload = ((contentReviewsInsert as any).mock.calls[0] ?? [])[0] as Record<string, unknown>;
+    const payload = ((contentReviewsInsert.mock.calls[0] as unknown[] | undefined) ?? [])[0] as Record<string, unknown>;
     const keys = Object.keys(payload as Record<string, unknown>);
     expect(keys).toEqual(["generated_content_id", "reviewer_id", "status", "notes", "reviewed_at"]);
     expect(payload.generated_content_id).toBe(content.id);

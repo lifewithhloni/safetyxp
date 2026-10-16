@@ -14,6 +14,7 @@ import {
   userEmail,
   validateManifest,
 } from "./live-rls-cleanup.mjs";
+import { resolveReportPath } from "./live-rls-report-path.mjs";
 import { resolveAuthorizedTarget } from "./live-rls-target.mjs";
 
 const RUN_ID = `${Date.now()}-${randomBytes(4).toString("hex")}`;
@@ -21,7 +22,6 @@ const NOW = new Date();
 const DATE_ONLY = NOW.toISOString().slice(0, 10);
 const TEST_FILE_TYPE = "application/pdf";
 const TEST_FILE_BYTES = "%PDF-1.4\n%";
-const REPORT_PATH = "docs/security-live-rls-results.json";
 // 42501: RLS / privilege violation. P0001: exception raised by prevent_profile_security_field_changes.
 const DENIAL_ERROR_CODES = new Set(["42501", "P0001"]);
 const CLIENT_OPTIONS = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
@@ -933,6 +933,8 @@ async function main() {
   const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
   const targetProjectRef = ensureExpectedTarget(supabaseUrl);
   console.log(`Target Supabase project: ${targetProjectRef} (${process.env.SECURITY_TEST_ENV})`);
+  // Validated before any request; defaults to docs/security-live-rls-results.json.
+  const reportPath = resolveReportPath(process.env.SECURITY_TEST_REPORT_PATH);
 
   const { publishableKey, serviceRoleKey } = readKeys();
   const adminClient = createClient(supabaseUrl, serviceRoleKey, CLIENT_OPTIONS);
@@ -978,7 +980,7 @@ async function main() {
       saveManifest(manifest);
     }
 
-    writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
+    writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
     console.log(`Run status: ${report.status}${report.error ? ` (${report.error})` : ""}`);
     console.log(`Live RLS checks: ${report.passed} passed, ${report.failed} failed.`);
@@ -990,7 +992,7 @@ async function main() {
       console.log(`${observation.name}: ${observation.detail}`);
     }
     printCleanup(report.cleanup);
-    console.log(`Report written to ${REPORT_PATH}`);
+    console.log(`Report written to ${reportPath}`);
 
     const cleanupOk = ["clean", "not_needed", "skipped"].includes(report.cleanup.status);
     if (report.status !== "completed" || report.failed > 0 || !cleanupOk) {
