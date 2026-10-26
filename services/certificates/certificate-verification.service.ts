@@ -28,6 +28,12 @@ export function getCertificateStatus(status: string, expiresAt: string | null) {
     return "REVOKED" as const;
   }
 
+  // A certificate must be issued before its expiry date can make it valid.
+  // In particular, generating, eligible, and failed records must never verify as valid.
+  if (status !== "issued") {
+    return "INVALID" as const;
+  }
+
   if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
     return "EXPIRED" as const;
   }

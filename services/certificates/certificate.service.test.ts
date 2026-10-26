@@ -58,4 +58,24 @@ describe("certificate eligibility and verification", () => {
     expect(expired).toBe("EXPIRED");
     expect(valid).toBe("VALID");
   });
+
+  it("never verifies non-issued certificates as valid", () => {
+    const futureExpiry = new Date(Date.now() + 86400000).toISOString();
+
+    expect(getCertificateStatus("generating", futureExpiry)).toBe("INVALID");
+    expect(getCertificateStatus("failed", futureExpiry)).toBe("INVALID");
+    expect(getCertificateStatus("eligible", futureExpiry)).toBe("INVALID");
+    expect(getCertificateStatus("expired", futureExpiry)).toBe("INVALID");
+    expect(getCertificateStatus("unknown", futureExpiry)).toBe("INVALID");
+  });
+
+  it("keeps revocation precedence over expiry", () => {
+    const pastExpiry = new Date(Date.now() - 86400000).toISOString();
+
+    expect(getCertificateStatus("revoked", pastExpiry)).toBe("REVOKED");
+  });
+
+  it("allows issued certificates with no expiry date", () => {
+    expect(getCertificateStatus("issued", null)).toBe("VALID");
+  });
 });

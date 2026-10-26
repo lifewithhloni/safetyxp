@@ -28,12 +28,20 @@ export default async function VerifyCertificatePage({
     ? "Certificate Verified"
     : result.verificationStatus === "EXPIRED"
       ? "Certificate Expired"
-      : "Certificate Revoked";
+      : result.verificationStatus === "REVOKED"
+        ? "Certificate Revoked"
+        : "Certificate Not Valid";
+
+  const verificationLabelClass = result.verificationStatus === "VALID"
+    ? "text-emerald-700"
+    : result.verificationStatus === "EXPIRED" || result.verificationStatus === "REVOKED"
+      ? "text-amber-700"
+      : "text-red-700";
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-16">
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Verification</p>
+        <p className={`text-sm font-semibold uppercase tracking-[0.2em] ${verificationLabelClass}`}>Verification</p>
         <h1 className="mt-3 text-3xl font-semibold text-slate-900">{heading}</h1>
         <p className="mt-1 text-sm text-slate-600">{result.certificateTitle}</p>
 
